@@ -3,6 +3,10 @@ uuid = "fdfbbab1-c06a-4770-a6f2-a4e776d3db5f"
 authors = ["Adam DAVID <adam.david@polytechnique.edu> and contributors"]
 version = "0.1.0"
 
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+EGPD = "c3d6fec6-66cc-479b-b3f2-8ef84979700f"
+
 [compat]
 julia = "1"
 
