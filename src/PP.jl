@@ -6,13 +6,14 @@ abstract type PP end
 
 
 struct PointProcess <: PP
-    times::Array{TimeType}
+    times::AbstractVector
 end
 
 
 struct MarkedPointProcess <: PP
-    times::Array{TimeType}
-    marks::Array{Real}
+    times::AbstractVector
+    marks::AbstractVector
+    MarkedPointProcess(times, marks) = size(times) == size(marks) ? new(times, marks) : error("times and marks must be the same size")
 end
 
 
