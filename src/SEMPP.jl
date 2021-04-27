@@ -1,4 +1,4 @@
-module Xiaoting
+module SEMPP
 
 using Distributions
 using EGPD
