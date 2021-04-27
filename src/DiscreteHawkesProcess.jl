@@ -1,3 +1,8 @@
+abstract type SEPP end
+
+baseline(sepp::SEPP) = sepp.μ
+decay(sepp::SEPP) = sepp.γ
+self_excitement_factor(sepp::SEPP) = sepp.ϕ
 
 """
 DiscreteSEPPExpKern(μ, ϕ, γ)
@@ -9,12 +14,14 @@ DiscreteSEPPExpKern(μ, ϕ, γ)
 where t_k are the timestamps of all events.
 """
 
-struct DiscreteSEPPExpKern
+struct DiscreteSEPPExpKern <: SEPP
     μ::Real
     ϕ::Real
     γ::Real
     DiscreteSEPPExpKern(μ, ϕ, γ) = any((μ, ϕ, γ) .< 0) ? error("paramaters must be positive or zero") : new(μ, ϕ, γ)
 end
+
+params(sepp::DiscreteSEPPExpKern) = (sepp.μ, sepp.ϕ, sepp.γ)
 
 """
 DiscreteSEMPPExpKern(μ, ϕ, γ, markdens, α, β)
@@ -30,7 +37,7 @@ f(m|t) is markdens with scale σ_t = β + α * ν(t)
 t_k are the timestamps of all events and m_k their marks.
 """
 
-struct DiscreteSEMPPExpKern
+struct DiscreteSEMPPExpKern <: SEPP
     μ::Real
     ϕ::Real
     γ::Real
@@ -39,6 +46,9 @@ struct DiscreteSEMPPExpKern
     β::Real
     DiscreteSEPPExpKern(μ, ϕ, γ, markdens, α, β) = any((μ, ϕ, γ, α, β) .< 0) ? error("paramaters must be positive or zero") : new(μ, ϕ, γ, markdens, α, β)
 end
+
+params(sepp::DiscreteSEMPPExpKern) = (sepp.μ, sepp.ϕ, sepp.γ, sepp.markdens, sepp.α, sepp.β)
+marks_scale_params(sepp::DiscreteSEMPPExpKern) = (sepp.α, sepp.β)
 
 
 """
