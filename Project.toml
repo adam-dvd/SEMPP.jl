@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 EGPD = "c3d6fec6-66cc-479b-b3f2-8ef84979700f"
+GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 
 [compat]

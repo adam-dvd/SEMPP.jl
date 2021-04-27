@@ -1,7 +1,10 @@
 abstract type SEPP end
 
 baseline(sepp::SEPP) = sepp.μ
-decay(sepp::SEPP) = sepp.γ
+
+# les deux noms suivants sont à vérifier
+
+exp_decay(sepp::SEPP) = sepp.γ
 self_excitement_factor(sepp::SEPP) = sepp.ϕ
 
 """
@@ -14,14 +17,22 @@ DiscreteSEPPExpKern(μ, ϕ, γ)
 where t_k are the timestamps of all events.
 """
 
-struct DiscreteSEPPExpKern <: SEPP
+mutable struct DiscreteSEPPExpKern <: SEPP
     μ::Real
     ϕ::Real
     γ::Real
-    DiscreteSEPPExpKern(μ, ϕ, γ) = any((μ, ϕ, γ) .< 0) ? error("paramaters must be positive or zero") : new(μ, ϕ, γ)
+
+    function DiscreteSEPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand()) 
+        if any((μ, ϕ, γ) .< 0) 
+            error("paramaters must be positive or zero")
+        else 
+            new(μ, ϕ, γ)
+        end
+    end
+
 end
 
-params(sepp::DiscreteSEPPExpKern) = (sepp.μ, sepp.ϕ, sepp.γ)
+params(sepp::DiscreteSEPPExpKern) = Dict(:μ => sepp.μ, :ϕ => sepp.ϕ, :γ => sepp.γ)
 
 """
 DiscreteSEMPPExpKern(μ, ϕ, γ, markdens, α, β)
@@ -37,18 +48,34 @@ f(m|t) is markdens with scale σ_t = β + α * ν(t)
 t_k are the timestamps of all events and m_k their marks.
 """
 
-struct DiscreteSEMPPExpKern <: SEPP
+mutable struct DiscreteSEMPPExpKern <: SEPP
     μ::Real
     ϕ::Real
     γ::Real
+    δ::Real
     markdens::ContinuousUnivariateDistribution
+    ξ::Real
     α::Real
     β::Real
-    DiscreteSEPPExpKern(μ, ϕ, γ, markdens, α, β) = any((μ, ϕ, γ, α, β) .< 0) ? error("paramaters must be positive or zero") : new(μ, ϕ, γ, markdens, α, β)
+    κ::Real
+
+    function DiscreteSEPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::ContinuousUnivariateDistribution = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand())
+        if any((μ, ϕ, γ, α, β, δ, κ) .< 0)
+            error("paramaters except for ξ must be positive or zero") 
+        else 
+            new(μ, ϕ, γ, δ, markdens, ξ, α, β, κ)
+        end
+    end
+
 end
 
-params(sepp::DiscreteSEMPPExpKern) = (sepp.μ, sepp.ϕ, sepp.γ, sepp.markdens, sepp.α, sepp.β)
+# noms à vérifier pour les parametres
+
+params(sepp::DiscreteSEMPPExpKern) = Dict(:μ => sepp.μ, :ϕ => sepp.ϕ, :γ => sepp.γ, :δ => sepp.δ, :markdens => sepp.markdens, :ξ => sepp.ξ, :α => sepp.α, :β => sepp.β, :κ => sepp.κ)
+lin_coeff_impact(sepp::DiscreteSEMPPExpKern) = sepp.δ
 marks_scale_params(sepp::DiscreteSEMPPExpKern) = (sepp.α, sepp.β)
+shape(sepp::DiscreteSEMPPExpKern) = sepp.κ
+decay(sepp::DiscreteSEMPPExpKern) = sepp.ξ
 
 
 """
@@ -91,16 +118,44 @@ negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
 TODO : if negloglik is to be exported, it might be useful to add methods so that negloglik can take a model as an argument instead of its paramaters
 """
 
+# one method for point process without marks
 
-function negloglik(pp::PointProcess, markdens::ContinuousUnivariateDistribution ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, β::Real, α::Real, κ::Real = 1)
+function negloglik(pp::PointProcess ;  μ::Real, ϕ::Real, γ::Real)
     
-    (all((μ, ϕ, γ, δ, β, α, κ) .>= 0)) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; warn("all paramaters except for ξ must be positive or zero, taking absolute value"))
+    (all((μ, ϕ, γ) .>= 0)) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; warn("all paramaters except for ξ must be positive or zero, taking absolute value"))
 
     endtime = end_time(pp)
     starttime = start_time(pp)
     anytimes= starttime:endtime
 
-    vol = volfunc(anytimes, pp, γ, δ)     # ν function in Li2020
+    vol = volfunc(anytimes, pp, γ)     # ν function in Li2020
+    intens =μ .+ ϕ .* vol       # rate λ in Li2020
+    prob = 1 - exp.(-intens )       # probability for an event to happen
+    t_idx = findall(in(times), anytimes) 
+    prob_1 = prob[t_idx]        # probability of the events that happened to happen
+    prob_0 = 1 .- prob[findall(!in(times), anytimes)] # probability of the events that didn't happen not to happen
+    term1 = sum(log.(prob_1)) + sum(log.(prob_0))
+ 
+    return (-term1)
+end 
+
+function negloglik(pp::PointProcess, sepp::DiscreteSEPPExpKern)
+    θ = params(sepp)
+    return negloglik(pp ; θ...)
+end
+
+
+# one methode for marked process
+
+function negloglik(mpp::MarkedPointProcess, markdens::ContinuousUnivariateDistribution ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+    
+    (all((μ, ϕ, γ, δ, β, α, κ) .>= 0)) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; warn("all paramaters except for ξ must be positive or zero, taking absolute value"))
+
+    endtime = end_time(mpp)
+    starttime = start_time(mpp)
+    anytimes= starttime:endtime
+
+    vol = volfunc(anytimes, mpp, γ, δ)     # ν function in Li2020
     intens =μ .+ ϕ .* vol       # rate λ in Li2020
     prob = 1 - exp.(-intens )       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
@@ -108,11 +163,8 @@ function negloglik(pp::PointProcess, markdens::ContinuousUnivariateDistribution 
     prob_0 = 1 .- prob[findall(!in(times), anytimes)] # probability of the events that didn't happen not to happen
     term1 = sum(log.(prob_1)) + sum(log.(prob_0))
 
-    if pp isa PointProcess 
-        return (-term1)
-    end 
-
     σ = β .+ α .* vol[t_idx]
+    marks = mpp.marks
 
     if markdens == Distributions.GeneralizedPareto      # GPD case
 
@@ -134,4 +186,34 @@ function negloglik(pp::PointProcess, markdens::ContinuousUnivariateDistribution 
     term2 = sum(mark_contrib)
     
     return -term1 - term2
-end 
+end
+
+
+function negloglik(mpp::MarkedPointProcess, sempp::DiscreteSEMPPExpKern)
+    θ = params(sempp)
+    markdens = θ[:markdens]
+    delete!(θ, :markdens)
+    return negloglik(mpp, mardens ; θ...)
+end
+
+
+function fit!(sepp::SEPP, pp::PP)
+    model = Model(GLPK.Optimizer)
+    θ = params(sepp)
+    @variables(model, begin
+        μ >= 0, (start = θ[:μ])
+        ϕ >= 0, (start = θ[:ϕ])
+        γ >= 0, (start = θ[:γ])
+    end)
+    @NLobjective(model, Min, negloglik(pp; μ, ϕ, γ))
+    
+    optimize!(model)
+
+    sepp.μ = value(μ)
+    sepp.ϕ = value(ϕ)
+    sepp.γ = value(γ)
+    
+    println(objective_value(model))
+
+    return
+end
