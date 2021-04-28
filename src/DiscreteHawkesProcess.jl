@@ -120,7 +120,7 @@ TODO : if negloglik is to be exported, it might be useful to add methods so that
 
 # one method for point process without marks
 
-function negloglik(pp::PointProcess ;  μ::Real, ϕ::Real, γ::Real)
+function negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)
     
     (all((μ, ϕ, γ) .>= 0)) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; warn("all paramaters except for ξ must be positive or zero, taking absolute value"))
 
@@ -166,19 +166,15 @@ function negloglik(mpp::MarkedPointProcess, markdens::ContinuousUnivariateDistri
     σ = β .+ α .* vol[t_idx]
     marks = mpp.marks
 
-    if markdens == Distributions.GeneralizedPareto      # GPD case
 
-        function log_cdf_markdens(sig_mark)
+    function log_cdf_markdens(sig_mark)
+        if markdens == Distributions.GeneralizedPareto
             return logcdf(markdens(0, ξ, sig_mark[1]), sig_mark[2])
-        end
-
-    else        # EGPD case
-
-        function log_cdf_markdens(sig_mark)
+        else        # EGPD case
             return logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])
         end
-
     end
+
 
     sig_marks = hcat(σ, marks)
     mark_contrib = log_cdf_markdens.(sig_marks)
@@ -201,11 +197,11 @@ function fit!(sepp::SEPP, pp::PP)
     model = Model(GLPK.Optimizer)
     θ = params(sepp)
     @variables(model, begin
-        μ >= 0, (start = θ[:μ])
-        ϕ >= 0, (start = θ[:ϕ])
-        γ >= 0, (start = θ[:γ])
+        mu >= 0, (start = θ[:μ])
+        phi >= 0, (start = θ[:ϕ])
+        gamma >= 0, (start = θ[:γ])
     end)
-    @NLobjective(model, Min, negloglik(pp; μ, ϕ, γ))
+    @NLobjective(model, Min, negloglik(pp, μ = mu, ϕ = phi, γ = gamma))
     
     optimize!(model)
 
