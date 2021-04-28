@@ -1,6 +1,6 @@
-"""
+#=
 A type for point process might be useful and precise things, but it might conversely impede clarity... not sure to keep it
-"""
+=#
 
 abstract type PP end
 

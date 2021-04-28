@@ -1,6 +1,9 @@
-using Xiaoting
-using Test
+using SEMPP
+using Test, Random
 
-@testset "Xiaoting.jl" begin
-    include("PP.jl")
+Random.seed!(12)
+
+@testset "SEMPP.jl" begin
+    include("PP_tests.jl")
+    include("DiscreteHawkesProcess_tests.jl")
 end

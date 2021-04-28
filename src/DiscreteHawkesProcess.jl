@@ -7,7 +7,7 @@ baseline(sepp::SEPP) = sepp.μ
 exp_decay(sepp::SEPP) = sepp.γ
 self_excitement_factor(sepp::SEPP) = sepp.ϕ
 
-"""
+#=
 DiscreteSEPPExpKern(μ, ϕ, γ)
 
 *DiscreteSEPPExpKern* is a discrete SEPP with exponential kernel model type with rate λ (for all t, there is an event with probability λ(t)) viz. :
@@ -15,7 +15,7 @@ DiscreteSEPPExpKern(μ, ϕ, γ)
 λ(t) = μ + ϕ \sum_{t_k < t} \exp(γ(t-t_k))
 
 where t_k are the timestamps of all events.
-"""
+=#
 
 mutable struct DiscreteSEPPExpKern <: SEPP
     μ::Real
@@ -34,7 +34,7 @@ end
 
 params(sepp::DiscreteSEPPExpKern) = Dict(:μ => sepp.μ, :ϕ => sepp.ϕ, :γ => sepp.γ)
 
-"""
+#=
 DiscreteSEMPPExpKern(μ, ϕ, γ, markdens, α, β)
 
 *DiscreteSEMPPExpKern* is a discrete SEMPP with exponential kernel model type such that for all t,m , there is an event in t with mark m with probability λ_g(t)f(m|t)) where :
@@ -46,7 +46,7 @@ with ν(t) = \sum_{t_k < t} (1 + δ*m_k) (\exp(γ(t-t_k))
 f(m|t) is markdens with scale σ_t = β + α * ν(t)
 
 t_k are the timestamps of all events and m_k their marks.
-"""
+=#
 
 mutable struct DiscreteSEMPPExpKern <: SEPP
     μ::Real
@@ -78,11 +78,11 @@ shape(sepp::DiscreteSEMPPExpKern) = sepp.κ
 decay(sepp::DiscreteSEMPPExpKern) = sepp.ξ
 
 
-"""
+#=
 volfunc(when, pp, γ, δ)
 
 *volfunc* is the term in the rate of a SEPP that corresponds to the self-excitement. In Li2020 it is denoted by ν.
-"""
+=#
 
 function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
     
@@ -110,13 +110,13 @@ function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
     return self_ex.(when)
 end
 
-"""
+#=
 negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
 
 *negloglik* calculates the negative log-likelihood of the SE(M)PP with the events and paramaters passed in arguments. 
 
 TODO : if negloglik is to be exported, it might be useful to add methods so that negloglik can take a model as an argument instead of its paramaters
-"""
+=#
 
 # one method for point process without marks
 
