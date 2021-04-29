@@ -88,7 +88,7 @@ function volfunc(when::AbstractVector, pp::SEMPP.PP, γ::Real, δ::Real = 0)
     
     γ >= 0 && error("γ must be positive or zero")
 
-    (pp isa SEMPP.PointProcess && δ != 0) && @warn "no marks but δ non zero"
+    (pp isa SEMPP.PointProcess && δ != 0) && (@warn "no marks but δ non zero")
 
     times = pp.times
     marks = pp isa SEMPP.MarkedPointProcess ? pp.marks : zeros(times)
@@ -124,7 +124,7 @@ TODO : if negloglik is to be exported, it might be useful to add methods so that
 
 function negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)
     
-    (all((μ, ϕ, γ) .>= 0)) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; warn("all paramaters except for ξ must be positive or zero, taking absolute value"))
+    (all((μ, ϕ, γ) .>= 0)) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn "all paramaters except for ξ must be positive or zero, taking absolute value" )
 
     endtime = end_time(pp)
     starttime = start_time(pp)
@@ -151,7 +151,7 @@ end
 
 function negloglik(mpp::MarkedPointProcess, markdens::ContinuousUnivariateDistribution ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     
-    (all((μ, ϕ, γ, δ, β, α, κ) .>= 0)) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; warn("all paramaters except for ξ must be positive or zero, taking absolute value"))
+    (all((μ, ϕ, γ, δ, β, α, κ) .>= 0)) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn "all paramaters except for ξ must be positive or zero, taking absolute value" )
 
     endtime = end_time(mpp)
     starttime = start_time(mpp)
