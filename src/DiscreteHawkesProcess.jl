@@ -91,7 +91,7 @@ function volfunc(when::AbstractVector, pp::SEMPP.PP, γ::Real, δ::Real = 0)
     (pp isa SEMPP.PointProcess && δ != 0) && (@warn "no marks but δ non zero")
 
     times = pp.times
-    marks = pp isa SEMPP.MarkedPointProcess ? pp.marks : zeros(times)
+    marks = pp isa SEMPP.MarkedPointProcess ? pp.marks : zero(times)
 
     mpp = hcat(times, marks)
 
