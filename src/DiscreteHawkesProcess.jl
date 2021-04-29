@@ -53,13 +53,14 @@ mutable struct DiscreteSEMPPExpKern <: SEPP
     ϕ::Real
     γ::Real
     δ::Real
-    markdens::ContinuousUnivariateDistribution
+    markdens::Any
     ξ::Real
     α::Real
     β::Real
     κ::Real
 
-    function DiscreteSEPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::ContinuousUnivariateDistribution = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand())
+
+    function DiscreteSEMPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::Any = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand())
         if any((μ, ϕ, γ, α, β, δ, κ) .< 0)
             error("paramaters except for ξ must be positive or zero") 
         else 
@@ -123,8 +124,9 @@ TODO : if negloglik is to be exported, it might be useful to add methods so that
 # one method for point process without marks
 
 function negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)
-    
-    (any((μ, ϕ, γ) .< 0)) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn "all paramaters must be positive or zero, taking absolute value")
+    tst = [μ, ϕ, γ] .< 0
+    w = [:μ, :ϕ, :γ][tst]
+    any(tst) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
 
     times = pp.times
     endtime = end_time(pp)
@@ -150,17 +152,19 @@ end
 
 # one methode for marked process
 
-function negloglik(mpp::MarkedPointProcess, markdens::ContinuousUnivariateDistribution ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
-    
-    (all((μ, ϕ, γ, δ, β, α, κ) .>= 0)) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn "all paramaters except for ξ must be positive or zero, taking absolute value" )
+function negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+    tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
+    w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
+    any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
 
+    times = mpp.times
     endtime = end_time(mpp)
     starttime = start_time(mpp)
     anytimes= starttime:endtime
 
     vol = volfunc(anytimes, mpp, γ, δ)     # ν function in Li2020
     intens =μ .+ ϕ .* vol       # rate λ in Li2020
-    prob = 1 - exp.(-intens )       # probability for an event to happen
+    prob = 1 .- exp.(-intens )       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
     prob_1 = prob[t_idx]        # probability of the events that happened to happen
     prob_0 = 1 .- prob[findall(!in(times), anytimes)] # probability of the events that didn't happen not to happen
@@ -180,7 +184,7 @@ function negloglik(mpp::MarkedPointProcess, markdens::ContinuousUnivariateDistri
 
 
     sig_marks = hcat(σ, marks)
-    mark_contrib = log_cdf_markdens.(sig_marks)
+    mark_contrib = log_cdf_markdens.(eachrow(sig_marks))
 
     term2 = sum(mark_contrib)
     
@@ -192,7 +196,7 @@ function negloglik(mpp::MarkedPointProcess, sempp::DiscreteSEMPPExpKern)
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
-    return negloglik(mpp, mardens ; θ...)
+    return negloglik(mpp, markdens ; θ...)
 end
 
 
