@@ -84,16 +84,17 @@ volfunc(when, pp, γ, δ)
 *volfunc* is the term in the rate of a SEPP that corresponds to the self-excitement. In Li2020 it is denoted by ν.
 =#
 
-function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
+function volfunc(when::AbstractVector, pp::SEMPP.PP, γ::Real, δ::Real = 0)
     
     γ >= 0 && error("γ must be positive or zero")
 
-    (pp isa PointProcess && δ != 0) && warn("no marks but δ non zero")
+    (pp isa SEMPP.PointProcess && δ != 0) && @warn "no marks but δ non zero"
 
     times = pp.times
-    marks = pp isa MarkedPointProcess ? pp.marks : zeros(times)
+    marks = pp isa SEMPP.MarkedPointProcess ? pp.marks : zeros(times)
 
     mpp = hcat(times, marks)
+
 
     function self_ex(t)
 
@@ -106,6 +107,7 @@ function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
 
         return sum(term.(eachline(mpp_to_t)))
     end
+
 
     return self_ex.(when)
 end
