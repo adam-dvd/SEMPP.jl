@@ -86,7 +86,7 @@ volfunc(when, pp, γ, δ)
 
 function volfunc(when::AbstractVector, pp::SEMPP.PP, γ::Real, δ::Real = 0)
     
-    γ >= 0 && error("γ must be positive or zero")
+    γ < 0 && error("γ must be positive or zero")
 
     (pp isa SEMPP.PointProcess && δ != 0) && (@warn "no marks but δ non zero")
 
@@ -98,14 +98,14 @@ function volfunc(when::AbstractVector, pp::SEMPP.PP, γ::Real, δ::Real = 0)
 
     function self_ex(t)
 
-        mpp_to_t = mpp[times .< t]
+        mpp_to_t = mpp[times .< t, :]
 
         function term(markedpoint)
             return (1+ δ*markedpoint[2])*exp(-γ*(t-markedpoint[1]))
         end
 
 
-        return sum(term.(eachline(mpp_to_t)))
+        return sum(term.(eachrow(mpp_to_t)))
     end
 
 

@@ -9,7 +9,7 @@
     γ = 7
     δ = 1.0
     @test_throws ErrorException SEMPP.volfunc(when, pp, -γ, δ)
-    @test_warn "no marks but δ non zero" SEMPP.volfunc(when, pp, γ, δ)
+    @test_logs (:warn,"no marks but δ non zero") SEMPP.volfunc(when, pp, γ, δ)
     @test size(SEMPP.volfunc(when, mpp, γ, δ)) == size(when)
     GPD = Distributions.GeneralizedPareto
     EGPD1 = EGPD.EGPpower

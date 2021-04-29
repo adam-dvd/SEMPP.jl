@@ -1,5 +1,5 @@
 using SEMPP
-using Test, Random
+using Test, Random, Distributions, EGPD
 
 Random.seed!(12)
 
