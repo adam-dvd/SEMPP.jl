@@ -7,7 +7,7 @@
     pp = SEMPP.PointProcess(times)
     mpp = SEMPP.MarkedPointProcess(times, marks)
 
-    μ = 0
+    μ = 2.0
     ϕ = 1
     γ = 1
     δ = 1.0
@@ -21,13 +21,21 @@
 
     GPD = Distributions.GeneralizedPareto
     EGPD1 = EGPD.EGPpower
+
     ξ = 1.5
     β = 2
     α = 1.1
     κ = 1.5
-    #=
-    @test_warn negloglik(times, marks, GPD, μ = μ, ϕ = -ϕ, γ = γ, δ = δ, ξ = ξ, β = β, α = α, κ = κ)
-    @test negloglik(times, marks, GPD, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, β = β, α = α, κ = κ) isa Real
-    @test negloglik(times, marks, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, β = β, α = α, κ = κ) isa Real
-    =#
+
+    @testset "negloglik(pp ; μ, ϕ, γ)" begin
+        @test_logs (:warn, "all paramaters must be positive or zero, taking absolute value") SEMPP.negloglik(pp, μ = μ, ϕ = -ϕ, γ = γ)
+        @test SEMPP.negloglik(pp, μ = μ, ϕ = ϕ, γ = γ) isa Real
+    end
+
+    sepp = SEMPP.DiscreteSEPPExpKern(μ, ϕ, γ)
+    
+    @testset "negloglik(pp, sepp)" begin
+        @test SEMPP.negloglik(pp, sepp) == SEMPP.negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
+    end
+
 end

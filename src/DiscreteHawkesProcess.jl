@@ -124,15 +124,16 @@ TODO : if negloglik is to be exported, it might be useful to add methods so that
 
 function negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)
     
-    (all((μ, ϕ, γ) .>= 0)) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn "all paramaters except for ξ must be positive or zero, taking absolute value" )
+    (any((μ, ϕ, γ) .< 0)) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn "all paramaters must be positive or zero, taking absolute value")
 
+    times = pp.times
     endtime = end_time(pp)
     starttime = start_time(pp)
     anytimes= starttime:endtime
 
     vol = volfunc(anytimes, pp, γ)     # ν function in Li2020
-    intens =μ .+ ϕ .* vol       # rate λ in Li2020
-    prob = 1 - exp.(-intens )       # probability for an event to happen
+    intens = μ .+ ϕ .* vol       # rate λ in Li2020
+    prob = 1 .- exp.(-intens )       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
     prob_1 = prob[t_idx]        # probability of the events that happened to happen
     prob_0 = 1 .- prob[findall(!in(times), anytimes)] # probability of the events that didn't happen not to happen
