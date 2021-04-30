@@ -49,4 +49,15 @@
         @test SEMPP.negloglik(mpp, sempp) == SEMPP.negloglik(mpp, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
+    @testset "fit!(sepp, pp)" begin
+        @test SEMPP.fit!(sepp, pp) isa Real
+        @test μ != sepp.μ
+        @test ϕ != sepp.ϕ
+        @test γ != sepp.γ
+        @test sepp.μ >= 0
+        @test sepp.ϕ >= 0
+        @test sepp.γ >= 0
+
+    end
+
 end

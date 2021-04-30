@@ -3,9 +3,9 @@ module SEMPP
 using Distributions
 using EGPD
 using JuMP
-using GLPK
+using Ipopt
 
-include("PP.jl")
+include("Types.jl")
 include("DiscreteHawkesProcess.jl")
 
 end
