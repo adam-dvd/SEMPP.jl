@@ -27,26 +27,26 @@
     α = 1.1
     κ = 1.5
 
-    @testset "negloglik(pp ; μ, ϕ, γ)" begin
-        @test_logs (:warn, "ϕ must be positive or zero, taking absolute value") SEMPP.negloglik(pp, μ = μ, ϕ = -ϕ, γ = γ)
-        @test SEMPP.negloglik(pp, μ = μ, ϕ = ϕ, γ = γ) isa Real
+    @testset "discrete_negloglik(pp ; μ, ϕ, γ)" begin
+        @test_logs (:warn, "ϕ must be positive or zero, taking absolute value") SEMPP.discrete_negloglik(pp, μ = μ, ϕ = -ϕ, γ = γ)
+        @test SEMPP.discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ) isa Real
     end
 
     sepp = SEMPP.DiscreteSEPPExpKern(μ, ϕ, γ)
     
-    @testset "negloglik(pp, sepp)" begin
-        @test SEMPP.negloglik(pp, sepp) == SEMPP.negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
+    @testset "discrete_negloglik(pp, sepp)" begin
+        @test SEMPP.discrete_negloglik(pp, sepp) == SEMPP.discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
     end
 
-    @testset "negloglik(mpp, mardens ; μ, ϕ, γ, δ, ξ, α, β, κ)" begin
-        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.negloglik(mpp, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
-        @test SEMPP.negloglik(mpp, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
+    @testset "discrete_negloglik(mpp, mardens ; μ, ϕ, γ, δ, ξ, α, β, κ)" begin
+        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.discrete_negloglik(mpp, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
+        @test SEMPP.discrete_negloglik(mpp, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
     end
 
     sempp = SEMPP.DiscreteSEMPPExpKern(μ, ϕ, γ, δ, EGPD1, ξ, α, β, κ)
 
-    @testset "negloglik(mpp, sempp)" begin
-        @test SEMPP.negloglik(mpp, sempp) == SEMPP.negloglik(mpp, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+    @testset "discrete_negloglik(mpp, sempp)" begin
+        @test SEMPP.discrete_negloglik(mpp, sempp) == SEMPP.discrete_negloglik(mpp, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
     @testset "fit!(sepp, pp)" begin

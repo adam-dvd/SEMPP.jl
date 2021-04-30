@@ -1,12 +1,9 @@
-
-
-#=
+"""
 volfunc(when, pp, γ, δ)
 
 *volfunc* is the term in the rate of a SEPP that corresponds to the self-excitement. In Li2020 it is denoted by ν.
-=#
-
-function volfunc(when::AbstractVector, pp::SEMPP.PP, γ::Real, δ::Real = 0)
+"""
+function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
     
     γ < 0 && error("γ must be positive or zero")
 
@@ -34,17 +31,14 @@ function volfunc(when::AbstractVector, pp::SEMPP.PP, γ::Real, δ::Real = 0)
     return self_ex.(when)
 end
 
-#=
-negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
+"""
+discrete_negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
 
-*negloglik* calculates the negative log-likelihood of the SE(M)PP with the events and paramaters passed in arguments. 
+*discrete_negloglik* calculates the negative log-likelihood of the SE(M)PP with the events and paramaters passed in arguments. 
 
-TODO : if negloglik is to be exported, it might be useful to add methods so that negloglik can take a model as an argument instead of its paramaters
-=#
-
-# one method for point process without marks
-
-function negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)
+TODO : if discrete_negloglik is to be exported, it might be useful to add methods so that discrete_negloglik can take a model as an argument instead of its paramaters
+"""
+function discrete_negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)        # one method for point process without marks
     tst = [μ, ϕ, γ] .< 0
     w = [:μ, :ϕ, :γ][tst]
     any(tst) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
@@ -65,15 +59,15 @@ function negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)
     return (-term1)
 end 
 
-function negloglik(pp::PointProcess, sepp::DiscreteSEPPExpKern)
+function discrete_negloglik(pp::PointProcess, sepp::DiscreteSEPPExpKern)
     θ = params(sepp)
-    return negloglik(pp ; θ...)
+    return discrete_negloglik(pp ; θ...)
 end
 
 
 # one methode for marked process
 
-function negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+function discrete_negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
     any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
@@ -113,11 +107,11 @@ function negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::Real, γ::
 end
 
 
-function negloglik(mpp::MarkedPointProcess, sempp::DiscreteSEMPPExpKern)
+function discrete_negloglik(mpp::MarkedPointProcess, sempp::DiscreteSEMPPExpKern)
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
-    return negloglik(mpp, markdens ; θ...)
+    return discrete_negloglik(mpp, markdens ; θ...)
 end
 
 
@@ -126,7 +120,7 @@ function fit!(sepp::SEPP, pp::PP)
     θ = params(sepp)
 
     function to_min(μ, ϕ, γ)
-        return negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
+        return discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
     end
 
     JuMP.register(model, :to_min, 3, to_min, autodiff=true)
