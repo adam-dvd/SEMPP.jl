@@ -15,6 +15,17 @@ struct MarkedPointProcess <: PP
     MarkedPointProcess(times, marks) = size(times) == size(marks) ? new(times, marks) : error("times and marks must be the same size")
 end
 
+# a method to see a point process as marked with zero marks
+function MarkedPointProcess(pp::PP)
+    if pp isa PointProcess
+        times = pp.times
+        marks = zero(times)
+        return MarkedPointProcess(times, marks)
+    end
+    
+    return pp
+end
+
 
 function ground_process(mpp::MarkedPointProcess)
     pp = PointProcess(mpp.times)

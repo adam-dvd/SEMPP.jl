@@ -49,8 +49,8 @@
         @test SEMPP.discrete_negloglik(mpp, sempp) == SEMPP.discrete_negloglik(mpp, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
-    @testset "fit!(sepp, pp)" begin
-        @test SEMPP.fit!(sepp, pp) isa Real
+    @testset "discrete_fit!(sepp, pp)" begin
+        @test SEMPP.discrete_fit!(sepp, pp) isa Real
         @test μ != sepp.μ
         @test ϕ != sepp.ϕ
         @test γ != sepp.γ

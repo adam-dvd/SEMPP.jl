@@ -31,6 +31,7 @@ function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
     return self_ex.(when)
 end
 
+
 """
 discrete_negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
 
@@ -38,7 +39,7 @@ discrete_negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
 
 TODO : if discrete_negloglik is to be exported, it might be useful to add methods so that discrete_negloglik can take a model as an argument instead of its paramaters
 """
-function discrete_negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)        # one method for point process without marks
+function discrete_negloglik(pp::PP;  μ::Real, ϕ::Real, γ::Real)        # one method for point process with or without marks (model without marks)
     tst = [μ, ϕ, γ] .< 0
     w = [:μ, :ϕ, :γ][tst]
     any(tst) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
@@ -59,7 +60,7 @@ function discrete_negloglik(pp::PointProcess;  μ::Real, ϕ::Real, γ::Real)    
     return (-term1)
 end 
 
-function discrete_negloglik(pp::PointProcess, sepp::DiscreteSEPPExpKern)
+function discrete_negloglik(pp::PP, sepp::SEPPExpKern)
     θ = params(sepp)
     return discrete_negloglik(pp ; θ...)
 end
@@ -107,7 +108,7 @@ function discrete_negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::R
 end
 
 
-function discrete_negloglik(mpp::MarkedPointProcess, sempp::DiscreteSEMPPExpKern)
+function discrete_negloglik(mpp::MarkedPointProcess, sempp::SEMPPExpKern)
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
@@ -115,7 +116,7 @@ function discrete_negloglik(mpp::MarkedPointProcess, sempp::DiscreteSEMPPExpKern
 end
 
 
-function fit!(sepp::SEPP, pp::PP)
+function discrete_fit!(sepp::SEPP, pp::PP) # generic method either to fit a pp whithout marks or to fit the ground process of an mpp
     model = Model(Ipopt.Optimizer)
     θ = params(sepp)
 
@@ -137,6 +138,73 @@ function fit!(sepp::SEPP, pp::PP)
     sepp.μ = value(mu)
     sepp.ϕ = value(phi)
     sepp.γ = value(gamma)
+
+    return objective_value(model)
+end
+
+
+function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Array{Real}(undef, (2,)) = nothing) # default xi >= 0
+    model = Model(Ipopt.Optimizer)
+    θ = params(sempp)
+    markdens = θ[:markdens]
+
+
+    function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
+        return discrete_negloglik(mpp, Distributions.GeneralizedPareto, μ, ϕ, γ, δ, ξ, α, β)
+    end
+
+
+    function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
+        return discrete_negloglik(mpp, markdens, μ, ϕ, γ, δ, ξ, α, β, κ)
+    end
+
+
+    if markdens == Distributions.GeneralizedPareto
+        JuMP.register(model, :to_min_GPD, 7, to_min, autodiff=true)
+    else
+        JuMP.register(model, :to_min_EGPD, 8, to_min, autodiff=true)
+    end
+
+
+    @variables(model, begin
+        mu >= 0, (start = θ[:μ])
+        phi >= 0, (start = θ[:ϕ])
+        gamma >= 0, (start = θ[:γ])
+        delta >= 0, (start = θ[:δ])
+        alpha >= 0, (start = θ[:α])
+        beta >= 0, (start = θ[:β])
+    end)
+
+    if markdens != Distributions.GeneralizedPareto
+        @variable(model, kappa >= 0, start = θ[:κ])
+    end
+
+    if isnothing(bounds)
+        @variable(model, xi >= 0, start = θ[:ξ])
+    else
+        @variable(model, bounds[1] <= xi <= bounds[2], start = θ[:ξ])
+    end
+
+
+    if markdens == Distributions.GeneralizedPareto
+        @NLobjective(model, Min, to_min_GPD(mu, phi, gamma, delta, xi, alpha, beta))
+    else
+        @NLobjective(model, Min, to_min_EGPD(mu, phi, gamma, delta, xi, alpha, beta, kappa))
+    end
+    
+    optimize!(model)
+
+    sempp.μ = value(mu)
+    sempp.ϕ = value(phi)
+    sempp.γ = value(gamma)
+    sempp.δ = value(gamma)
+    sempp.ξ = value(gamma)
+    sempp.α = value(gamma)
+    sempp.β = value(gamma)
+
+    if markdens != Distributions.GeneralizedPareto
+        sempp.κ = value(kappa)
+    end
 
     return objective_value(model)
 end
