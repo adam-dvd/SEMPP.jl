@@ -54,7 +54,7 @@ function negloglik(mpp::MarkedPointProcess, markdens ; μ::Real = rand(), ϕ::Re
 
 end
 
-function discrete_negloglik(mpp::MarkedPointProcess, sempp::SEMPPExpKern)
+function negloglik(mpp::MarkedPointProcess, sempp::SEMPPExpKern)
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
@@ -84,6 +84,73 @@ function fit!(sepp::SEPP, pp::PointProcess)
     sepp.μ = value(mu)
     sepp.ϕ = value(phi)
     sepp.γ = value(gamma)
+
+    return objective_value(model)
+end
+
+
+function fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{Real}, Nothing} = nothing) # default xi >= 0
+    model = Model(Ipopt.Optimizer)
+    θ = params(sempp)
+    markdens = θ[:markdens]
+
+
+    function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
+        return negloglik(mpp, Distributions.GeneralizedPareto, μ, ϕ, γ, δ, ξ, α, β)
+    end
+
+
+    function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
+        return negloglik(mpp, markdens, μ, ϕ, γ, δ, ξ, α, β, κ)
+    end
+
+
+    if markdens == Distributions.GeneralizedPareto
+        JuMP.register(model, :to_min_GPD, 7, to_min, autodiff=true)
+    else
+        JuMP.register(model, :to_min_EGPD, 8, to_min, autodiff=true)
+    end
+
+
+    @variables(model, begin
+        mu >= 0, (start = θ[:μ])
+        phi >= 0, (start = θ[:ϕ])
+        gamma >= 0, (start = θ[:γ])
+        delta >= 0, (start = θ[:δ])
+        alpha >= 0, (start = θ[:α])
+        beta >= 0, (start = θ[:β])
+    end)
+
+    if markdens != Distributions.GeneralizedPareto
+        @variable(model, kappa >= 0, start = θ[:κ])
+    end
+
+    if isnothing(bounds)
+        @variable(model, xi >= 0, start = θ[:ξ])
+    else
+        @variable(model, bounds[1] <= xi <= bounds[2], start = θ[:ξ])
+    end
+
+
+    if markdens == Distributions.GeneralizedPareto
+        @NLobjective(model, Min, to_min_GPD(mu, phi, gamma, delta, xi, alpha, beta))
+    else
+        @NLobjective(model, Min, to_min_EGPD(mu, phi, gamma, delta, xi, alpha, beta, kappa))
+    end
+    
+    optimize!(model)
+
+    sempp.μ = value(mu)
+    sempp.ϕ = value(phi)
+    sempp.γ = value(gamma)
+    sempp.δ = value(gamma)
+    sempp.ξ = value(gamma)
+    sempp.α = value(gamma)
+    sempp.β = value(gamma)
+
+    if markdens != Distributions.GeneralizedPareto
+        sempp.κ = value(kappa)
+    end
 
     return objective_value(model)
 end

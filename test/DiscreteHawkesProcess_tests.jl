@@ -32,7 +32,7 @@
         @test SEMPP.discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ) isa Real
     end
 
-    sepp = SEMPP.DiscreteSEPPExpKern(μ, ϕ, γ)
+    sepp = SEPPExpKern(μ, ϕ, γ)
     
     @testset "discrete_negloglik(pp, sepp)" begin
         @test SEMPP.discrete_negloglik(pp, sepp) == SEMPP.discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
@@ -43,21 +43,59 @@
         @test SEMPP.discrete_negloglik(mpp, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
     end
 
-    sempp = SEMPP.DiscreteSEMPPExpKern(μ, ϕ, γ, δ, EGPD1, ξ, α, β, κ)
+    sempp_egpd = SEMPPExpKern(μ, ϕ, γ, δ, EGPD1, ξ, α, β, κ)
+    sempp_gpd = SEMPPExpKern(μ, ϕ, γ, δ, GPD, ξ, α, β)
 
     @testset "discrete_negloglik(mpp, sempp)" begin
         @test SEMPP.discrete_negloglik(mpp, sempp) == SEMPP.discrete_negloglik(mpp, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
     @testset "discrete_fit!(sepp, pp)" begin
-        @test SEMPP.discrete_fit!(sepp, pp) isa Real
+        @test discrete_fit!(sepp, pp) isa Real
         @test μ != sepp.μ
         @test ϕ != sepp.ϕ
         @test γ != sepp.γ
         @test sepp.μ >= 0
         @test sepp.ϕ >= 0
         @test sepp.γ >= 0
+    end
 
+    @testset "discrete_fit!(sempp, mpp)" begin
+        @test discrete_fit!(sempp_egpd, mpp) isa Real
+        @test discrete_fit!(sempp_gpd, mpp) isa Real
+        @test μ != sempp_egpd.μ
+        @test ϕ != sempp_egpd.ϕ
+        @test γ != sempp_egpd.γ
+        @test δ != sempp_egpd.δ
+        @test ξ != sempp_egpd.ξ
+        @test α != sempp_egpd.α
+        @test β != sempp_egpd.β
+        @test κ != sempp_egpd.κ
+
+        @test sempp_egpd.μ >=0
+        @test sempp_egpd.ϕ >=0
+        @test sempp_egpd.γ >=0
+        @test sempp_egpd.δ >=0
+        @test sempp_egpd.ξ >=0
+        @test sempp_egpd.α >=0
+        @test sempp_egpd.β >=0
+        @test sempp_egpd.κ >=0
+
+        @test μ != sempp_gpd.μ
+        @test ϕ != sempp_gpd.ϕ
+        @test γ != sempp_gpd.γ
+        @test δ != sempp_gpd.δ
+        @test ξ != sempp_gpd.ξ
+        @test α != sempp_gpd.α
+        @test β != sempp_gpd.β
+
+        @test sempp_gpd.μ >=0
+        @test sempp_gpd.ϕ >=0
+        @test sempp_gpd.γ >=0
+        @test sempp_gpd.δ >=0
+        @test sempp_gpd.ξ >=0
+        @test sempp_gpd.α >=0
+        @test sempp_gpd.β >=0
     end
 
 end

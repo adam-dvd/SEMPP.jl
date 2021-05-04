@@ -56,9 +56,7 @@ self_excitement_factor(sepp::SEPP) = sepp.ϕ
 SEPPExpKern(μ, ϕ, γ)
 
 *SEPPExpKern* is a SEPP with exponential kernel model type with rate λ (for all t, there is an event with probability λ(t)) viz. :
-$$
-λ(t) = μ + ϕ \sum_{t_k < t} \exp(γ(t-t_k))
-$$
+''λ(t) = μ + ϕ \\sum_{t_k < t} \\exp(γ(t-t_k))''
 where t_k are the timestamps of all events.
 """
 mutable struct SEPPExpKern <: SEPP
@@ -84,9 +82,9 @@ SEMPPExpKern(μ, ϕ, γ, markdens, α, β)
 *SEMPPExpKern* is a SEMPP with exponential kernel model type such that for all t,m , there is an event in t with mark m with probability λ_g(t)f(m|t)) where :
 
 λ_g(t) = μ + ϕ * ν(t)
-$$
-with ν(t) = \sum_{t_k < t} (1 + δ*m_k) (\exp(γ(t-t_k))
-$$
+
+with ''ν(t) = \\sum_{t_k < t} (1 + δ*m_k) (\\exp(γ(t-t_k))''
+
 f(m|t) is markdens with scale σ_t = β + α * ν(t)
 
 t_k are the timestamps of all events and m_k their marks.

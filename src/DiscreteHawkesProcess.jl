@@ -143,7 +143,7 @@ function discrete_fit!(sepp::SEPP, pp::PP) # generic method either to fit a pp w
 end
 
 
-function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Array{Real}(undef, (2,)) = nothing) # default xi >= 0
+function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{Real}, Nothing} = nothing) # default xi >= 0
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
     markdens = θ[:markdens]
