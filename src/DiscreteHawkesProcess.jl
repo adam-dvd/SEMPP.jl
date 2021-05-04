@@ -92,7 +92,7 @@ function discrete_negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::R
 
     function log_cdf_markdens(sig_mark)
         if markdens == Distributions.GeneralizedPareto
-            return logcdf(markdens(0, ξ, sig_mark[1]), sig_mark[2])
+            return logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])
         else        # EGPD case
             return logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])
         end
@@ -150,19 +150,19 @@ function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Uni
 
 
     function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
-        return discrete_negloglik(mpp, Distributions.GeneralizedPareto, μ, ϕ, γ, δ, ξ, α, β)
+        return discrete_negloglik(mpp, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
     end
 
 
     function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
-        return discrete_negloglik(mpp, markdens, μ, ϕ, γ, δ, ξ, α, β, κ)
+        return discrete_negloglik(mpp, markdens, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
 
     if markdens == Distributions.GeneralizedPareto
-        JuMP.register(model, :to_min_GPD, 7, to_min, autodiff=true)
+        JuMP.register(model, :to_min_GPD, 7, to_min_GPD, autodiff=true)
     else
-        JuMP.register(model, :to_min_EGPD, 8, to_min, autodiff=true)
+        JuMP.register(model, :to_min_EGPD, 8, to_min_EGPD, autodiff=true)
     end
 
 

@@ -32,7 +32,7 @@
         @test SEMPP.discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ) isa Real
     end
 
-    sepp = SEPPExpKern(μ, ϕ, γ)
+    sepp = SEMPP.SEPPExpKern(μ, ϕ, γ)
     
     @testset "discrete_negloglik(pp, sepp)" begin
         @test SEMPP.discrete_negloglik(pp, sepp) == SEMPP.discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
@@ -47,7 +47,7 @@
     sempp_gpd = SEMPPExpKern(μ, ϕ, γ, δ, GPD, ξ, α, β)
 
     @testset "discrete_negloglik(mpp, sempp)" begin
-        @test SEMPP.discrete_negloglik(mpp, sempp) == SEMPP.discrete_negloglik(mpp, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+        @test SEMPP.discrete_negloglik(mpp, sempp_egpd) == SEMPP.discrete_negloglik(mpp, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
     @testset "discrete_fit!(sepp, pp)" begin

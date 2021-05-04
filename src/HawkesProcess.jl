@@ -38,7 +38,7 @@ function negloglik(mpp::MarkedPointProcess, markdens ; μ::Real = rand(), ϕ::Re
 
     function log_cdf_markdens(sig_mark)
         if markdens == Distributions.GeneralizedPareto
-            return logcdf(markdens(0, ξ, sig_mark[1]), sig_mark[2])
+            return logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])
         else        # EGPD case
             return logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])
         end
