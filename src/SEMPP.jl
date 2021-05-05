@@ -4,6 +4,7 @@ using Distributions
 using EGPD
 using JuMP
 using Ipopt
+using DataFrames, Gadfly
 
 include("Types.jl")
 include("DiscreteHawkesProcess.jl")

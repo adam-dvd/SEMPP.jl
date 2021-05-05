@@ -115,7 +115,11 @@ function discrete_negloglik(mpp::MarkedPointProcess, sempp::SEMPPExpKern)
     return discrete_negloglik(mpp, markdens ; θ...)
 end
 
+"""
+    discrete_fit!(sepp, pp)
 
+*discrete_fit!(sepp,pp)* allows one to fit a self exciting point process model (whithout marks) to a time series ignoring its marks if it has marks, that is modelling the ground process as independent of the marks. 
+"""
 function discrete_fit!(sepp::SEPP, pp::PP) # generic method either to fit a pp whithout marks or to fit the ground process of an mpp
     model = Model(Ipopt.Optimizer)
     θ = params(sepp)
@@ -142,8 +146,12 @@ function discrete_fit!(sepp::SEPP, pp::PP) # generic method either to fit a pp w
     return objective_value(model)
 end
 
+"""
+    discrete_fit!(sepp, pp)
 
-function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{Real}, Nothing} = nothing) # default xi >= 0
+*discrete_fit!(sepp,mpp, bounds)* allows one to fit a self exciting marked point process model with marks distribution either GPD or EGPD (1, 2 or 3).
+"""
+function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
     markdens = θ[:markdens]

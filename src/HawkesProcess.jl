@@ -89,7 +89,7 @@ function fit!(sepp::SEPP, pp::PointProcess)
 end
 
 
-function fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{Real}, Nothing} = nothing) # default xi >= 0
+function fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
     markdens = θ[:markdens]
