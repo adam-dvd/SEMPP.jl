@@ -33,7 +33,7 @@ end
 
 
 """
-discrete_negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
+    discrete_negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
 
 *discrete_negloglik* calculates the negative log-likelihood of the SE(M)PP with the events and paramaters passed in arguments. 
 
