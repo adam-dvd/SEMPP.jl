@@ -1,7 +1,7 @@
 """
-volfunc(when, pp, γ, δ)
+    volfunc(when, pp, γ, δ)
 
-*volfunc* is the term in the rate of a SEPP that corresponds to the self-excitement. In Li2020 it is denoted by ν.
+compute the term in the rate of a SEPP that corresponds to the self-excitement, denoted by ν in Li2020.
 """
 function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
     
@@ -35,7 +35,7 @@ end
 """
     discrete_negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
 
-*discrete_negloglik* calculates the negative log-likelihood of the SE(M)PP with the events and paramaters passed in arguments. 
+compute the negative log-likelihood of the process in argument. 
 
 TODO : if discrete_negloglik is to be exported, it might be useful to add methods so that discrete_negloglik can take a model as an argument instead of its paramaters
 """
@@ -68,7 +68,7 @@ end
 
 # one methode for marked process
 
-function discrete_negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+function discrete_negloglik(mpp::MarkedPointProcess, markdens::SupportedMarksDistributions ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
     any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
@@ -89,18 +89,13 @@ function discrete_negloglik(mpp::MarkedPointProcess, markdens ;  μ::Real, ϕ::R
     σ = β .+ α .* vol[t_idx]
     marks = mpp.marks
 
-
-    function log_cdf_markdens(sig_mark)
-        if markdens == Distributions.GeneralizedPareto
-            return logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])
-        else        # EGPD case
-            return logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])
-        end
-    end
-
-
     sig_marks = hcat(σ, marks)
-    mark_contrib = log_cdf_markdens.(eachrow(sig_marks))
+
+    if markdens == Distributions.GeneralizedPareto
+        mark_contrib = (sig_mark -> logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])).(eachrow(sig_marks))
+    else        # EGPpower case
+        mark_contrib = (sig_mark -> logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])).(eachrow(sig_marks))
+    end
 
     term2 = sum(mark_contrib)
     
@@ -118,7 +113,9 @@ end
 """
     discrete_fit!(sepp, pp)
 
-*discrete_fit!(sepp,pp)* allows one to fit a self exciting point process model (whithout marks) to a time series ignoring its marks if it has marks, that is modelling the ground process as independent of the marks. 
+fit a self exciting point process model (whithout marks) to a time series. 
+
+Note that if the process has marks, this method ignores them, that is modelling the ground process as independent of the marks. 
 """
 function discrete_fit!(sepp::SEPP, pp::PP) # generic method either to fit a pp whithout marks or to fit the ground process of an mpp
     model = Model(Ipopt.Optimizer)
@@ -149,7 +146,7 @@ end
 """
     discrete_fit!(sepp, pp)
 
-*discrete_fit!(sepp,mpp, bounds)* allows one to fit a self exciting marked point process model with marks distribution either GPD or EGPD (1, 2 or 3).
+fit a self exciting marked point process model with marks distribution either GPD or EGPpower.
 """
 function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
     model = Model(Ipopt.Optimizer)
@@ -163,7 +160,7 @@ function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Uni
 
 
     function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
-        return discrete_negloglik(mpp, markdens, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+        return discrete_negloglik(mpp, EGPD.EGPpower, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
 
@@ -183,7 +180,7 @@ function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Uni
         beta >= 0, (start = θ[:β])
     end)
 
-    if markdens != Distributions.GeneralizedPareto
+    if markdens == EGPD.EGPpower
         @variable(model, kappa >= 0, start = θ[:κ])
     end
 

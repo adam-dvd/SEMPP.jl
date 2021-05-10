@@ -9,6 +9,9 @@ using DataFrames, Gadfly
 include("Types.jl")
 include("DiscreteHawkesProcess.jl")
 include("HawkesProcess.jl")
+include(joinpath("Plots", "PlotsData.jl"))
+include(joinpath("Plots", "ModelPlots.jl"))
+include(joinpath("Plots", "ValidationPlots.jl"))
 
 export 
     # data types

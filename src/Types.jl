@@ -76,6 +76,10 @@ end
 
 params(sepp::SEPPExpKern) = Dict(:μ => sepp.μ, :ϕ => sepp.ϕ, :γ => sepp.γ)
 
+
+SupportedMarksDistributions = Union{Distributions.GeneralizedPareto, EGPD.EGPpower}
+
+
 """
 SEMPPExpKern(μ, ϕ, γ, markdens, α, β)
 
@@ -94,14 +98,14 @@ mutable struct SEMPPExpKern <: SEPP
     ϕ::Real
     γ::Real
     δ::Real
-    markdens::Any
+    markdens::SupportedMarksDistributions
     ξ::Real
     α::Real
     β::Real
     κ::Real
 
 
-    function SEMPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::Any = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand())
+    function SEMPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::SupportedMarksDistributions = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand())
         if any((μ, ϕ, γ, α, β, δ, κ) .< 0)
             error("paramaters except for ξ must be positive or zero") 
         else 
