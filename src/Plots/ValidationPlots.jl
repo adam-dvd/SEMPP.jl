@@ -11,7 +11,7 @@ function pp_prob_plot(sepp::SEPP, pp::PP)
 
     emp = layer(x = p, y = s, color = [color("black")], Geom.line, order = 1)
 
-    plt = plot(id, emp, Guide.title = "Point process probability plot", Guide.xlabel = "Empirical", Guide.ylabel = "Model")
+    plt = plot(id, emp, Guide.title("Point process probability plot"), Guide.xlabel("Empirical"), Guide.ylabel("Model"))
 
     return plt
 end
@@ -29,7 +29,7 @@ function marks_prob_plot(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
 
     emp = layer(x = p, y = s, color = [color("black")], Geom.point, order = 1)
 
-    plt = plot(id, emp, Guide.title = "Marks probability plot", Guide.xlabel = "Empirical", Guide.ylabel = "Model")
+    plt = plot(id, emp, Guide.title("Marks probability plot"), Guide.xlabel("Empirical"), Guide.ylabel("Model"))
 
     return plt
 end
@@ -47,7 +47,7 @@ function marks_qq_plot(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
     
     emp = layer(x = mod_q, y = emp_q, color = [color("black")], Geom.point, order = 1)
     
-    plt = plot(id, emp, Guide.title = "Marks quantile plot", Guide.xlabel = "Empirical", Guide.ylabel = "Model")
+    plt = plot(id, emp, Guide.title("Marks quantile plot"), Guide.xlabel("Empirical"), Guide.ylabel("Model"))
 
     return plt
 end

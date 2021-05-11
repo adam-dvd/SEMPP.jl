@@ -77,7 +77,7 @@ end
 params(sepp::SEPPExpKern) = Dict(:μ => sepp.μ, :ϕ => sepp.ϕ, :γ => sepp.γ)
 
 
-SupportedMarksDistributions = Union{Distributions.GeneralizedPareto, EGPD.EGPpower}
+SupportedMarksDistributions = Union{Type{Distributions.GeneralizedPareto}, Type{EGPD.EGPpower}}
 
 
 """

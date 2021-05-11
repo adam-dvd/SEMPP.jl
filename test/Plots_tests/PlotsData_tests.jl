@@ -24,31 +24,31 @@
     sempp_gpd = SEMPPExpKern(μ, ϕ, γ, δ, GPD, ξ, α, β)
 
     @testset "pp_analysis" begin
-        s, p = pp_analysis(sepp, pp)
+        s, p = SEMPP.pp_analysis(sepp, pp)
         @test length(s) == 2
         @test length(p) == 2
 
-        s, p = pp_analysis(sempp, mpp)
-        @test length(s_m) == 2
-        @test length(p_m) == 2
+        s, p = SEMPP.pp_analysis(sempp_gpd, mpp)
+        @test length(s) == 2
+        @test length(p) == 2
     end
 
     @testset "transformed_marks_ecdf" begin
-        s, p = transformed_marks_ecdf(sempp_egpd, mpp)
+        s, p = SEMPP.transformed_marks_ecdf(sempp_egpd, mpp)
         @test length(s) == 2
         @test length(p) == 2
 
-        s, p = transformed_marks_ecdf(sempp_gpd, mpp)
+        s, p = SEMPP.transformed_marks_ecdf(sempp_gpd, mpp)
         @test length(s) == 2
         @test length(p) == 2
     end
 
     @testset "marks_unit_exponential_qq" begin
-        s, p = marks_unit_exponential_qq(sempp_egpd, mpp)
+        s, p = SEMPP.marks_unit_exponential_qq(sempp_egpd, mpp)
         @test length(s) == 2
         @test length(p) == 2
 
-        s, p = marks_unit_exponential_qq(sempp_gpd, mpp)
+        s, p = SEMPP.marks_unit_exponential_qq(sempp_gpd, mpp)
         @test length(s) == 2
         @test length(p) == 2
     end

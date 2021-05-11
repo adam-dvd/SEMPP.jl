@@ -1,5 +1,5 @@
 using SEMPP
-using Test, Random, Distributions, EGPD, DataFrames, Gadfly
+using Test, Random, Distributions, EGPD
 
 Random.seed!(12)
 

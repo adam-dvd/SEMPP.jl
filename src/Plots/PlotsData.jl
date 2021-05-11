@@ -43,7 +43,9 @@ function pp_analysis(sepp::SEPP, pp::PP)
     γ = sepp.γ
     δ = sepp isa SEMPPExpKern ? sepp.δ : 0
 
-    τs = μ .* (times .- starttime) + ϕ/γ .* (i -> cumsum((1 .+ δ .* marks[1:i]) .* (1 .- exp.(-γ .*(times[i] .- times[1:i]))))).(1:length(times))
+    aux(i) = sum((1 .+ δ .* marks[1:i]) .* (1 .- exp.(-γ .*(times[i] .- times[1:i]))))
+
+    τs = μ .* (times .- starttime) .+ ϕ/γ .* aux.(collect(1:length(times)))
 
     scaled = τs ./ (last(τs))
 
@@ -75,14 +77,14 @@ function transformed_marks_ecdf(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
     κ = sempp.κ
 
     vol = volfunc(times, mpp, γ, δ)
-    σ = β + α .* vol
+    σ = β .+ α .* vol
 
     sigmarks = hcat(σ, marks)
 
     if markdens == Distributions.GeneralizedPareto
-        u = (sigmark -> cdf(Distributions.GeneralizedPareto(0, sigmark[1], ξ), sigmark[2])).eachrow(sigmarks)
+        u = (sigmark -> cdf(Distributions.GeneralizedPareto(0, sigmark[1], ξ), sigmark[2])).(eachrow(sigmarks))
     else    # EGPD case
-        u = (sigmark -> cdf(EGPD.EGPpower(sigmark[1], ξ, κ), sigmark[2])).eachrow(sigmarks)
+        u = (sigmark -> cdf(EGPD.EGPpower(sigmark[1], ξ, κ), sigmark[2])).(eachrow(sigmarks))
     end
 
     return ecdf(u)
