@@ -47,7 +47,7 @@ function discrete_negloglik(pp::PP;  μ::Real, ϕ::Real, γ::Real)        # one 
     times = pp.times
     endtime = end_time(pp)
     starttime = start_time(pp)
-    anytimes= starttime:endtime
+    anytimes= starttime:oneunit(starttime-endtime):endtime
 
     vol = volfunc(anytimes, pp, γ)     # ν function in Li2020
     intens = μ .+ ϕ .* vol       # rate λ in Li2020
@@ -76,7 +76,7 @@ function discrete_negloglik(mpp::MarkedPointProcess, markdens::SupportedMarksDis
     times = mpp.times
     endtime = end_time(mpp)
     starttime = start_time(mpp)
-    anytimes= starttime:endtime
+    anytimes= starttime:oneunit(starttime-endtime):endtime
 
     vol = volfunc(anytimes, mpp, γ, δ)     # ν function in Li2020
     intens =μ .+ ϕ .* vol       # rate λ in Li2020
