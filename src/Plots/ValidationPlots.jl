@@ -4,8 +4,8 @@ Plot the probability plot for the point process.
 
 See 4.1 in Li2020. 
 """ 
-function pp_prob_plot(sepp::SEPP, pp::PP)
-    s, p = pp_analysis(sepp, pp)
+function pp_prob_plot(sepp::SEPP)
+    s, p = pp_analysis(sepp)
 
     id = layer(x = p, y = p, color = [color("red")], Geom.line, order = 2)
 
@@ -22,8 +22,9 @@ Plot the probability plot for the marks.
 
 See 4.2 in Li2020. 
 """ 
-function marks_prob_plot(sempp::SEMPPExpKern, mpp::MarkedPointProcess) 
-    s, p = transformed_marks_ecdf(sempp, mpp)
+function marks_prob_plot(sempp::SEMPPExpKern)
+
+    s, p = transformed_marks_ecdf(sempp)
 
     id = layer(x = p, y = p, color = [color("red")], Geom.line, order = 2)
 
@@ -40,8 +41,9 @@ Plot the quantile plot based on the unit exponential distribution.
 
 See 4.2 in Li2020.
 """
-function marks_qq_plot(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
-    emp_q, mod_q = marks_unit_exponential_qq(sempp, mpp)
+function marks_qq_plot(sempp::SEMPPExpKern)
+
+    emp_q, mod_q = marks_unit_exponential_qq(sempp)
 
     id = layer(x = mod_q, y = mod_q, color = [color("red")], Geom.line, order = 2)
     

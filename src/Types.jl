@@ -60,15 +60,16 @@ SEPPExpKern(μ, ϕ, γ)
 where t_k are the timestamps of all events.
 """
 mutable struct SEPPExpKern <: SEPP
+    data::Union{PP, Nothing}
     μ::Real
     ϕ::Real
     γ::Real
 
-    function SEPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand()) 
+    function SEPPExpKern(data::Union{PP, Nothing} = nothing; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand()) 
         if any((μ, ϕ, γ) .< 0) 
             error("paramaters must be positive or zero")
         else 
-            new(μ, ϕ, γ)
+            new(data,μ, ϕ, γ)
         end
     end
 
@@ -94,6 +95,7 @@ f(m|t) is markdens with scale σ_t = β + α * ν(t)
 t_k are the timestamps of all events and m_k their marks.
 """
 mutable struct SEMPPExpKern <: SEPP
+    data::Union{MarkedPointProcess, Nothing}
     μ::Real
     ϕ::Real
     γ::Real
@@ -105,11 +107,11 @@ mutable struct SEMPPExpKern <: SEPP
     κ::Real
 
 
-    function SEMPPExpKern(μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::SupportedMarksDistributions = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand())
+    function SEMPPExpKern(data::Union{MarkedPointProcess, Nothing} = nothing; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::SupportedMarksDistributions = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand())
         if any((μ, ϕ, γ, α, β, δ, κ) .< 0)
             error("paramaters except for ξ must be positive or zero") 
         else 
-            new(μ, ϕ, γ, δ, markdens, ξ, α, β, κ)
+            new(data, μ, ϕ, γ, δ, markdens, ξ, α, β, κ)
         end
     end
 

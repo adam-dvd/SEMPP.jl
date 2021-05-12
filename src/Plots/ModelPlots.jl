@@ -1,4 +1,7 @@
-function rate_plot(sepp::SEPP, pp::PP, step::Real = 1)
+function rate_plot(sepp::SEPP, step::Real = 1)
+
+    pp = sepp.data
+    isnothing(pp) && error("No data in the model, can't plot")
 
     times = pp.times
     starttime = start_time(pp)
@@ -35,13 +38,16 @@ function marks_plot(mpp::MarkedPointProcess)
     return plt
 end
 
-function marked_rate_plot(sepp::SEPP, mpp::MarkedPointProcess, step::Real = 1)
+function marked_rate_plot(sepp::SEPP, step=nothing)
+
+    mpp = MarkedPointProcess(sepp.data)
+    isnothing(mpp) && error("No data in the model, can't plot")
     
     marks = mpp.marks
     times = mpp.times
     starttime = start_time(mpp)
     endtime = end_time(mpp)
-    anytimes = starttime:step:endtime
+    anytimes = isnothing(step) ? (starttime:oneunit(endtime-starttime):endtime) : (starttime:step:endtime)
 
     μ = sepp.μ
     ϕ = sepp.ϕ
@@ -61,4 +67,12 @@ function marked_rate_plot(sepp::SEPP, mpp::MarkedPointProcess, step::Real = 1)
     push!(plt, rate_layer)
 
     return plt
+end
+
+
+function marked_rate_plot(sempp::SEMPPExpKern, step= nothing)
+    mpp = sempp.data
+    isnothing(mpp) && error("No data in the model, can't plot marks")
+     
+    return marked_rate_plot(sempp, step)
 end

@@ -60,7 +60,10 @@ function discrete_negloglik(pp::PP;  μ::Real, ϕ::Real, γ::Real)        # one 
     return (-term1)
 end 
 
-function discrete_negloglik(pp::PP, sepp::SEPPExpKern)
+function discrete_negloglik(sepp::SEPPExpKern)
+    pp = sepp.data
+    isnothing(pp) && error("No data in model, can't compute log-likelihood")
+
     θ = params(sepp)
     return discrete_negloglik(pp ; θ...)
 end
@@ -103,7 +106,10 @@ function discrete_negloglik(mpp::MarkedPointProcess, markdens::SupportedMarksDis
 end
 
 
-function discrete_negloglik(mpp::MarkedPointProcess, sempp::SEMPPExpKern)
+function discrete_negloglik(sempp::SEMPPExpKern)
+    mpp = sempp.data
+    isnothing(mpp) && error("No data in model, can't compute log-likelihood")
+
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
@@ -117,7 +123,10 @@ fit a self exciting point process model (whithout marks) to a time series.
 
 Note that if the process has marks, this method ignores them, that is modelling the ground process as independent of the marks. 
 """
-function discrete_fit!(sepp::SEPP, pp::PP) # generic method either to fit a pp whithout marks or to fit the ground process of an mpp
+function discrete_fit!(sepp::SEPP) # generic method either to fit a pp whithout marks or to fit the ground process of an mpp
+    pp=sepp.data
+    isnothing(pp) && error("No data in model, can't fit")
+
     model = Model(Ipopt.Optimizer)
     θ = params(sepp)
 
@@ -148,7 +157,10 @@ end
 
 fit a self exciting marked point process model with marks distribution either GPD or EGPpower.
 """
-function discrete_fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
+function discrete_fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
+    mpp = sempp.data
+    isnothing(mpp) && error("No data in model, can't fit")
+
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
     markdens = θ[:markdens]

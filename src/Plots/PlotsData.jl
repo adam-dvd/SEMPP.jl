@@ -29,7 +29,9 @@ Compute the rescaled time transformed of the realizations of the point process.
 
 It should behave like order statistics from a standard uniform distribution.
 """
-function pp_analysis(sepp::SEPP, pp::PP)
+function pp_analysis(sepp::SEPP)
+    pp=sepp.data
+    isnothing(pp) && error("No data in model")
 
     mpp = MarkedPointProcess(pp)
     marks = mpp.marks
@@ -61,7 +63,9 @@ Compute the transformed marks ecdf for ploting.
 
 See Li2020 4.2..
 """
-function transformed_marks_ecdf(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
+function transformed_marks_ecdf(sempp::SEMPPExpKern)
+    mpp = sempp.data
+    isnothing(mpp) && error("No data in model")
     
     times = mpp.times
     marks = mpp.marks
@@ -96,8 +100,9 @@ Compute the quantile plot data based on the unit exponential distribution.
 
 See 4.2 in Li2020.
 """
-function marks_unit_exponential_qq(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
-    u, p = transformed_marks_ecdf(sempp, mpp)
+function marks_unit_exponential_qq(sempp::SEMPPExpKern)
+
+    u, p = transformed_marks_ecdf(sempp)
     
     model_qs = -log.(1 .- p)
 

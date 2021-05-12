@@ -1,4 +1,4 @@
-function negloglik(pp::PointProcess ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())
+function negloglik(pp::PP; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())
     
     times = pp.times
     starttime = start_time(pp)
@@ -13,7 +13,10 @@ function negloglik(pp::PointProcess ; μ::Real = rand(), ϕ::Real = rand(), γ::
 end
 
 
-function negloglik(pp::PointProcess, sepp::SEPPExpKern)
+function negloglik(sepp::SEPPExpKern)
+    pp = sepp.data
+    isnothing(pp) && error("No data in model, can't compute log-likelihood")
+
     θ = params(sepp)
     return negloglik(pp ; θ...)
 end
@@ -54,7 +57,10 @@ function negloglik(mpp::MarkedPointProcess, markdens ; μ::Real = rand(), ϕ::Re
 
 end
 
-function negloglik(mpp::MarkedPointProcess, sempp::SEMPPExpKern)
+function negloglik(sempp::SEMPPExpKern)
+    mpp = sempp.data
+    isnothing(mpp) && error("No data in model, can't compute log-likelihood")
+
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
@@ -62,7 +68,10 @@ function negloglik(mpp::MarkedPointProcess, sempp::SEMPPExpKern)
 end
 
 
-function fit!(sepp::SEPP, pp::PointProcess)
+function fit!(sepp::SEPPExpKern)
+    pp = sepp.data
+    isnothing(pp) && error("No data in model, can't fit")
+
     model = Model(Ipopt.Optimizer)
     θ = params(sepp)
 
@@ -89,7 +98,10 @@ function fit!(sepp::SEPP, pp::PointProcess)
 end
 
 
-function fit!(sempp::SEMPPExpKern, mpp::MarkedPointProcess, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
+function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
+    mpp = sempp.data
+    isnothing(mpp) && error("No data in model, can't fit")
+
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
     markdens = θ[:markdens]
