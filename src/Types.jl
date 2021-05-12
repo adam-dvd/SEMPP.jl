@@ -19,7 +19,7 @@ end
 function MarkedPointProcess(pp::PP)
     if pp isa PointProcess
         times = pp.times
-        marks = zero(times)
+        marks = fill(0, size(times))
         return MarkedPointProcess(times, marks)
     end
     
