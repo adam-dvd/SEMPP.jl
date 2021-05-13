@@ -1,4 +1,4 @@
-function rate_plot(sepp::SEPP, step = nothing, from = nothing, to = nothing)
+function rate_plot(sepp::SEPP; step = nothing, from = nothing, to = nothing)
 
     pp = sepp.data
     isnothing(pp) && error("No data in the model, can't plot")
