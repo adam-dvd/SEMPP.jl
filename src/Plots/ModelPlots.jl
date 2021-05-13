@@ -1,10 +1,10 @@
-function rate_plot(sepp::SEPP, step = nothing)
+function rate_plot(sepp::SEPP, step = nothing, from = nothing, to = nothing)
 
     pp = sepp.data
     isnothing(pp) && error("No data in the model, can't plot")
 
-    starttime = start_time(pp)
-    endtime = end_time(pp)
+    starttime = isnothing(from) ? start_time(pp) : from
+    endtime = isnothing(to) ? end_time(pp) : to
     anytimes = isnothing(step) ? (starttime:oneunit(starttime-endtime):endtime) : (starttime:step:endtime)
 
     μ = sepp.μ

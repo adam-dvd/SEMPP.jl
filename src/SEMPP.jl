@@ -29,6 +29,9 @@ export
     lin_coeff_impact, marks_scale_params, shape, decay,
 
     # model manipulation
-    discrete_negloglik, negloglik, discrete_fit!, fit!
+    discrete_negloglik, negloglik, discrete_fit!, fit!,
+
+    # plots
+    rate_plot, pp_prob_plot
 
 end
