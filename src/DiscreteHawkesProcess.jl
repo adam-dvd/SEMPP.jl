@@ -10,7 +10,7 @@ function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
     (pp isa SEMPP.PointProcess && δ != 0) && (@warn "no marks but δ non zero")
 
     times = pp.times
-    marks = pp isa SEMPP.MarkedPointProcess ? pp.marks : zero(times)
+    marks = pp isa SEMPP.MarkedPointProcess ? pp.marks : fill(0, size(times))
 
     mpp = hcat(times, marks)
 
@@ -19,10 +19,7 @@ function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
 
         mpp_to_t = mpp[times .< t, :]
 
-        function term(markedpoint)
-            return (1+ δ*markedpoint[2])*exp(-γ*(t-markedpoint[1]))
-        end
-
+        term(markedpoint) = (1+ δ*markedpoint[2])*exp(-γ*(t-markedpoint[1]))
 
         return sum(term.(eachrow(mpp_to_t)))
     end
