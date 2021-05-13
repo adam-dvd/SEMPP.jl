@@ -6,13 +6,24 @@ abstract type PP end
 
 struct PointProcess <: PP
     times::AbstractVector
+
+    function PointProcess(times)
+        times = reshape(times, (length(times),))
+        return new(times)
+    end
 end
 
 
 struct MarkedPointProcess <: PP
     times::AbstractVector
     marks::AbstractVector
-    MarkedPointProcess(times, marks) = size(times) == size(marks) ? new(times, marks) : error("times and marks must be the same size")
+    
+    function MarkedPointProcess(times, marks) 
+        length(times) == length(marks) && error("times and marks must be the same size")
+        times = reshape(times, (length(times),))
+        marks = reshape(marks, (length(marks),))
+        return new(times, marks)
+    end
 end
 
 # a method to see a point process as marked with zero marks
@@ -27,8 +38,8 @@ function MarkedPointProcess(pp::PP)
 end
 
 
-function ground_process(mpp::MarkedPointProcess)
-    pp = PointProcess(mpp.times)
+function ground_process(pp::PP)
+    pp = PointProcess(pp.times)
     return pp
 end
 
