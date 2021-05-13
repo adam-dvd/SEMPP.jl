@@ -5,6 +5,7 @@ using EGPD
 using JuMP
 using Ipopt
 using DataFrames, Gadfly
+using Dates
 
 include("Types.jl")
 include("DiscreteHawkesProcess.jl")
