@@ -1,12 +1,11 @@
-function rate_plot(sepp::SEPP, step::Real = 1)
+function rate_plot(sepp::SEPP, step = nothing)
 
     pp = sepp.data
     isnothing(pp) && error("No data in the model, can't plot")
 
-    times = pp.times
     starttime = start_time(pp)
     endtime = end_time(pp)
-    anytimes = starttime:step:endtime
+    anytimes = isnothing(step) ? (starttime:oneunit(starttime-endtime):endtime) : (starttime:step:endtime)
 
     μ = sepp.μ
     ϕ = sepp.ϕ
@@ -15,7 +14,7 @@ function rate_plot(sepp::SEPP, step::Real = 1)
 
     lamb = μ .+ ϕ .* volfunc(anytimes, pp, γ, δ)
 
-    points = zero(times)
+    points = fill(0, size(anytimes))
 
     rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], Geom.line)
 

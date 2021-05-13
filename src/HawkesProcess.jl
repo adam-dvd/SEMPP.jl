@@ -1,8 +1,8 @@
 function negloglik(pp::PP; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())
     
-    times = pp.times
-    starttime = start_time(pp)
-    endtime = end_time(pp)
+    times = first(pp.times) isa TimeType ? Dates.value.(pp.times) : pp.times
+    starttime = first(times)
+    endtime = last(times)
     T = endtime - starttime
 
     vol = volfunc(times, pp, γ)
@@ -24,9 +24,9 @@ end
 
 function negloglik(mpp::MarkedPointProcess, markdens ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)
     
-    times = mpp.times
-    starttime = start_time(mpp)
-    endtime = end_time(mpp)
+    times = first(mpp.times) isa TimeType ? Dates.value.(mpp.times) : mpp.times
+    starttime = first(times)
+    endtime = last(times)
     T = endtime - starttime
 
     marks = mpp.marks

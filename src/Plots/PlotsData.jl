@@ -35,10 +35,9 @@ function pp_analysis(sepp::SEPP)
 
     mpp = MarkedPointProcess(pp)
     marks = mpp.marks
-    times = mpp.times
+    times = first(mpp.times) isa TimeType ? Dates.value.(mpp.times) : mpp.times
 
-    starttime = start_time(mpp)
-    endtime = end_time(mpp)
+    starttime = first(times)
 
     μ = sepp.μ
     ϕ = sepp.ϕ
@@ -70,8 +69,6 @@ function transformed_marks_ecdf(sempp::SEMPPExpKern)
     times = mpp.times
     marks = mpp.marks
     
-    μ = sempp.μ
-    ϕ = sempp.ϕ
     γ = sempp.γ
     δ = sempp.δ
     markdens = sempp.markdens
