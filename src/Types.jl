@@ -17,9 +17,9 @@ end
 struct MarkedPointProcess <: PP
     times::AbstractVector
     marks::AbstractVector
-    
+
     function MarkedPointProcess(times, marks) 
-        length(times) == length(marks) && error("times and marks must be the same size")
+        length(times) == length(marks) || error("times and marks must be the same size")
         times = reshape(times, (length(times),))
         marks = reshape(marks, (length(marks),))
         return new(times, marks)
