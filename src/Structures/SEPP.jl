@@ -40,3 +40,5 @@ Get the paramaters of the model.
 function params end
 
 
+include("SEPP/SEPPExpKern.jl")
+include("SEPP/SEMPPExpKern.jl")
