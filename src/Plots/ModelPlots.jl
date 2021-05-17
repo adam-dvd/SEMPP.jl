@@ -4,7 +4,7 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
     isnothing(ts) && error("No data in the model, can't plot")
 
     times = ts.times
-    times[1] isa Date && times = DateTime.(times)
+    (times[1] isa Date) && (times = DateTime.(times))
 
     isnothing(from_idx) && (from_idx = 1)
     isnothing(to_idx) && (to_idx = length(times))
