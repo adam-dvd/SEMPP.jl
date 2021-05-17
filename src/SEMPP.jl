@@ -15,7 +15,7 @@ include(joinpath("Plots", "ValidationPlots.jl"))
 
 export 
     # data types
-    PP, PointProcess, MarkedPointProcess,
+    TS, TimeSeries, MarkedTimeSeries,
 
     # data types methods
     end_time, start_time, ground_process,
