@@ -1,11 +1,11 @@
 function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = nothing)
 
-    pp = sepp.data
-    isnothing(pp) && error("No data in the model, can't plot")
+    ts = sepp.data
+    isnothing(ts) && error("No data in the model, can't plot")
 
-    times = pp.times
-    starttime = isnothing(from_idx) ? start_time(pp) : times[from_idx]
-    endtime = isnothing(to_idx) ? end_time(pp) : times[to_idx]
+    times = ts.times
+    starttime = isnothing(from_idx) ? start_time(ts) : times[from_idx]
+    endtime = isnothing(to_idx) ? end_time(ts) : times[to_idx]
     anytimes = isnothing(step) ? (starttime:oneunit(starttime-endtime):endtime) : (starttime:step:endtime)
 
     μ = sepp.μ
@@ -13,7 +13,7 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
     γ = sepp.γ
     δ = sepp isa SEMPPExpKern ? sepp.δ : 0
 
-    lamb = μ .+ ϕ .* volfunc(anytimes, pp, γ, δ)
+    lamb = μ .+ ϕ .* volfunc(anytimes, ts, γ, δ)
 
     points = fill(0, (to_idx-from_idx,))
 
@@ -25,9 +25,9 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
 end
 
 
-function marks_plot(mpp::MarkedPointProcess)
-    marks = mpp.marks
-    times = mpp.times
+function marks_plot(mts::MarkedTimeSeries)
+    marks = mts.marks
+    times = mts.times
 
     plt = plot(x=times, y=marks, Geom.point) 
     
@@ -38,15 +38,16 @@ function marks_plot(mpp::MarkedPointProcess)
     return plt
 end
 
+
 function marked_rate_plot(sepp::SEPP, step=nothing)
 
-    mpp = MarkedPointProcess(sepp.data)
-    isnothing(mpp) && error("No data in the model, can't plot")
+    mts = MarkedTimeSeries(sepp.data)
+    isnothing(mts) && error("No data in the model, can't plot")
     
-    marks = mpp.marks
-    times = mpp.times
-    starttime = start_time(mpp)
-    endtime = end_time(mpp)
+    marks = mts.marks
+    times = mts.times
+    starttime = start_time(mts)
+    endtime = end_time(mts)
     anytimes = isnothing(step) ? (starttime:oneunit(endtime-starttime):endtime) : (starttime:step:endtime)
 
     μ = sepp.μ
@@ -54,7 +55,7 @@ function marked_rate_plot(sepp::SEPP, step=nothing)
     γ = sepp.γ
     δ = sepp isa SEMPPExpKern ? sepp.δ : 0
 
-    lamb = μ .+ ϕ .* volfunc(anytimes, pp, γ, δ)
+    lamb = μ .+ ϕ .* volfunc(anytimes, ts, γ, δ)
 
     rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], Geom.line)
 
@@ -71,8 +72,8 @@ end
 
 
 function marked_rate_plot(sempp::SEMPPExpKern, step= nothing)
-    mpp = sempp.data
-    isnothing(mpp) && error("No data in the model, can't plot marks")
+    mts = sempp.data
+    isnothing(mts) && error("No data in the model, can't plot marks")
      
     return marked_rate_plot(sempp, step)
 end

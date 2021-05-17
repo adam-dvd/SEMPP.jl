@@ -1,5 +1,5 @@
 """
-    pp_prob_plot(sepp::SEPP, pp::PP)
+    pp_prob_plot(sepp::SEPP)
 Plot the probability plot for the point process.
 
 See 4.1 in Li2020. 
@@ -17,7 +17,7 @@ function pp_prob_plot(sepp::SEPP)
 end
 
 """
-    marks_prob_plot(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
+    marks_prob_plot(sempp::SEMPPExpKern)
 Plot the probability plot for the marks.
 
 See 4.2 in Li2020. 
@@ -36,7 +36,7 @@ function marks_prob_plot(sempp::SEMPPExpKern)
 end
 
 """
-    marks_qq_plot(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
+    marks_qq_plot(sempp::SEMPPExpKern)
 Plot the quantile plot based on the unit exponential distribution.
 
 See 4.2 in Li2020.

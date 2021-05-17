@@ -23,19 +23,19 @@ function ecdf(y::Vector{<:Real})::Tuple{Vector{<:Real}, Vector{<:Real}}
 end
 
 """
-    pp_analysis
+    pp_analysis(sepp::SEPP)
 
 Compute the rescaled time transformed of the realizations of the point process.
 
 It should behave like order statistics from a standard uniform distribution.
 """
 function pp_analysis(sepp::SEPP)
-    pp=sepp.data
-    isnothing(pp) && error("No data in model")
+    ts=sepp.data
+    isnothing(ts) && error("No data in model")
 
-    mpp = MarkedPointProcess(pp)
-    marks = mpp.marks
-    times = first(mpp.times) isa TimeType ? Dates.value.(mpp.times) : mpp.times
+    mts = MarkedTimeSeries(ts)
+    marks = mts.marks
+    times = first(mts.times) isa TimeType ? Dates.value.(mts.times) : mts.times
 
     starttime = first(times)
 
@@ -56,18 +56,18 @@ function pp_analysis(sepp::SEPP)
 end
 
 """
-    transformed_marks_ecdf(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
+    transformed_marks_ecdf(sempp::SEMPPExpKern)
 
 Compute the transformed marks ecdf for ploting.
 
 See Li2020 4.2..
 """
 function transformed_marks_ecdf(sempp::SEMPPExpKern)
-    mpp = sempp.data
-    isnothing(mpp) && error("No data in model")
+    mts = sempp.data
+    isnothing(mts) && error("No data in model")
     
-    times = mpp.times
-    marks = mpp.marks
+    times = mts.times
+    marks = mts.marks
     
     γ = sempp.γ
     δ = sempp.δ
@@ -77,7 +77,7 @@ function transformed_marks_ecdf(sempp::SEMPPExpKern)
     β = sempp.β
     κ = sempp.κ
 
-    vol = volfunc(times, mpp, γ, δ)
+    vol = volfunc(times, mts, γ, δ)
     σ = β .+ α .* vol
 
     sigmarks = hcat(σ, marks)
@@ -92,7 +92,7 @@ function transformed_marks_ecdf(sempp::SEMPPExpKern)
 end
 
 """
-    marks_unit_exponential_qq(sempp::SEMPPExpKern, mpp::MarkedPointProcess)
+    marks_unit_exponential_qq(sempp::SEMPPExpKern)
 Compute the quantile plot data based on the unit exponential distribution.
 
 See 4.2 in Li2020.
