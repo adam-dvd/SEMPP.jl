@@ -15,7 +15,7 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
 
     lamb = μ .+ ϕ .* volfunc(anytimes, ts, γ, δ)
 
-    points = fill(0, (to_idx-from_idx,))
+    points = fill(0, (isnothing(from_idx) ? size(times) : (to_idx-from_idx,)))
 
     rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], Geom.line)
 
