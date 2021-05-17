@@ -3,9 +3,12 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
     ts = sepp.data
     isnothing(ts) && error("No data in the model, can't plot")
 
+    isnothing(from_idx) && (from_idx = 1)
+    isnothing(to_idx) && (to_idx = length(ts))
+
     times = ts.times
-    starttime = isnothing(from_idx) ? start_time(ts) : times[from_idx]
-    endtime = isnothing(to_idx) ? end_time(ts) : times[to_idx]
+    starttime = times[from_idx]
+    endtime = times[to_idx]
     anytimes = isnothing(step) ? (starttime:oneunit(starttime-endtime):endtime) : (starttime:step:endtime)
 
     μ = sepp.μ
@@ -15,12 +18,8 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
 
     lamb = μ .+ ϕ .* volfunc(anytimes, ts, γ, δ)
 
-    if isnothing(from_idx)
-        points = fill(0, size(times))
-    else
-        points = fill(0, (to_idx-from_idx,))
-    end
-
+    points = fill(0, (to_idx-from_idx,))
+    
     rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], Geom.line)
 
     plt = plot(x = times[from_idx:to_idx], y = points, size = [0mm], Geom.point, Guide.xrug, Theme(grid_line_width=0mm), rate_layer)
