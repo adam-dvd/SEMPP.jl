@@ -33,4 +33,4 @@ export
     # plots
     rate_plot, pp_prob_plot
 
-end
+end # module
