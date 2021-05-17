@@ -21,7 +21,7 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
     
     rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], Geom.line)
 
-    points_layer = layer(x = times[from_idx:to_idx], y = points, alpha = [0.7], Geom.point)
+    points_layer = layer(x = times[from_idx:to_idx], y = points, shape = [:cross], Geom.point)
 
     plt = plot(rate_layer, points_layer, Theme(grid_line_width=0mm))
 
