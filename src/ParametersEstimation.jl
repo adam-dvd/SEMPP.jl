@@ -1,9 +1,9 @@
 """
-    volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0)::Real
+    volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0)::AbstractVector{<:Real}
 
 Compute the volatility function that is the term in the rate of a SEPP that corresponds to the self-excitement, denoted by ν in Li2020.
 """
-function volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0)::Real
+function volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0)::AbstractVector{<:Real}
     
     γ < 0 && error("γ must be positive or zero")
 
