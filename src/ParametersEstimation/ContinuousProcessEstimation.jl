@@ -1,11 +1,16 @@
-function negloglik(pp::PP; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())
+"""
+    function negloglik(ts::TS; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())::Real
+
+Compute the negative log-likelihood of ts with parameters in kwargs.
+"""
+function negloglik(ts::TS; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())::Real
     
-    times = first(pp.times) isa TimeType ? Dates.value.(pp.times) : pp.times
+    times = first(ts.times) isa TimeType ? Dates.value.(ts.times) : ts.times
     starttime = first(times)
     endtime = last(times)
     T = endtime - starttime
 
-    vol = volfunc(times, pp, γ)
+    vol = volfunc(times, ts, γ)
     term1 = sum(log.(μ .+ ϕ .* vol))
     term2 = μ * T + ϕ/γ * sum(1 .- exp.(-γ .* (endtime .- times)))
 
@@ -13,25 +18,35 @@ function negloglik(pp::PP; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand
 end
 
 
-function negloglik(sepp::SEPPExpKern)
-    pp = sepp.data
-    isnothing(pp) && error("No data in model, can't compute log-likelihood")
+"""
+    negloglik(sepp::SEPPExpKern)::Real
+
+Compute the negative log-likelihood of the time series in data with parmaters of the sepp model.
+"""
+function negloglik(sepp::SEPPExpKern)::Real
+    ts = sepp.data
+    isnothing(ts) && error("No data in model, can't compute log-likelihood")
 
     θ = params(sepp)
-    return negloglik(pp ; θ...)
+    return negloglik(ts ; θ...)
 end
 
 
-function negloglik(mpp::MarkedPointProcess, markdens ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)
+"""
+    negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
+
+Compute the negative log-likelihood of the marked time series with parmaters in kwargs.
+"""
+function negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
     
-    times = first(mpp.times) isa TimeType ? Dates.value.(mpp.times) : mpp.times
+    times = first(mts.times) isa TimeType ? Dates.value.(mts.times) : mts.times
     starttime = first(times)
     endtime = last(times)
     T = endtime - starttime
 
-    marks = mpp.marks
+    marks = mts.marks
 
-    vol = volfunc(times, mpp, γ)
+    vol = volfunc(times, mts, γ)
     
     term1 = sum(log.(μ .+ ϕ .* vol))
     term2 = μ * T + ϕ/γ * sum((1 .+ δ .* marks) .* (1 .- exp.(-γ .* (endtime .- times))))
@@ -57,26 +72,40 @@ function negloglik(mpp::MarkedPointProcess, markdens ; μ::Real = rand(), ϕ::Re
 
 end
 
-function negloglik(sempp::SEMPPExpKern)
-    mpp = sempp.data
-    isnothing(mpp) && error("No data in model, can't compute log-likelihood")
+
+"""
+    negloglik(sempp::SEMPPExpKern)::Real
+
+ Compute the negative log-likelihood of the marked time series in data with parmaters of the sempp model.
+"""
+function negloglik(sempp::SEMPPExpKern)::Real
+    mts = sempp.data
+    isnothing(mts) && error("No data in model, can't compute log-likelihood")
 
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
-    return negloglik(mpp, markdens ; θ...)
+    return negloglik(mts, markdens ; θ...)
 end
 
 
-function fit!(sepp::SEPPExpKern)
-    pp = sepp.data
-    isnothing(pp) && error("No data in model, can't fit")
+"""
+    fit!(sepp::SEPPExpKern)::Real
+
+Fit a self exciting point process model (whithout marks) to the time series in data, based on MLE. 
+
+Note that if the time series has marks, this method ignores them, that is modelling the ground process as independent of the marks.
+Returns the minimal Log-likelihood found.
+""" 
+function fit!(sepp::SEPPExpKern)::Real
+    ts = sepp.data
+    isnothing(ts) && error("No data in model, can't fit")
 
     model = Model(Ipopt.Optimizer)
     θ = params(sepp)
 
     function to_min(μ, ϕ, γ)
-        return negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
+        return negloglik(ts, μ = μ, ϕ = ϕ, γ = γ)
     end
 
     JuMP.register(model, :to_min, 3, to_min, autodiff=true)
@@ -98,9 +127,16 @@ function fit!(sepp::SEPPExpKern)
 end
 
 
-function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
-    mpp = sempp.data
-    isnothing(mpp) && error("No data in model, can't fit")
+"""
+    fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing)::Real
+
+Fit a self exciting marked point process model to the marked time series in data, based on MLE. 
+
+Returns the minimal Log-likelihood found.
+""" 
+function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing)::Real # default xi >= 0
+    mts = sempp.data
+    isnothing(mts) && error("No data in model, can't fit")
 
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
@@ -108,12 +144,12 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
 
     function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
-        return negloglik(mpp, Distributions.GeneralizedPareto, μ, ϕ, γ, δ, ξ, α, β)
+        return negloglik(mts, Distributions.GeneralizedPareto, μ, ϕ, γ, δ, ξ, α, β)
     end
 
 
     function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
-        return negloglik(mpp, markdens, μ, ϕ, γ, δ, ξ, α, β, κ)
+        return negloglik(mts, markdens, μ, ϕ, γ, δ, ξ, α, β, κ)
     end
 
 
@@ -166,4 +202,3 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
     return objective_value(model)
 end
-

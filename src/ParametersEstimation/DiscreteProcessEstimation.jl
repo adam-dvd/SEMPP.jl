@@ -1,53 +1,19 @@
 """
-    volfunc(when, pp, γ, δ)
+    discrete_negloglik::Real
 
-compute the term in the rate of a SEPP that corresponds to the self-excitement, denoted by ν in Li2020.
+Compute the negative log-likelihood of the process in argument. 
 """
-function volfunc(when::AbstractVector, pp::PP, γ::Real, δ::Real = 0)
-    
-    γ < 0 && error("γ must be positive or zero")
-
-    (pp isa SEMPP.PointProcess && δ != 0) && (@warn "no marks but δ non zero")
-
-    first(when) isa TimeType && (when = Dates.value.(when))
-    times = first(pp.times) isa TimeType ? Dates.value.(pp.times) : pp.times
-    marks = pp isa SEMPP.MarkedPointProcess ? pp.marks : fill(0, size(times))
-
-    mpp = hcat(times, marks)
-
-
-    function self_ex(t)
-
-        mpp_to_t = mpp[times .< t, :]
-
-        term(markedpoint) = (1+ δ*markedpoint[2])*exp(-γ*(t-markedpoint[1]))
-
-        return sum(term.(eachrow(mpp_to_t)))
-    end
-
-
-    return self_ex.(when)
-end
-
-
-"""
-    discrete_negloglik(pp, markdens, μ, ϕ, γ, δ, ξ, β, α)
-
-compute the negative log-likelihood of the process in argument. 
-
-TODO : if discrete_negloglik is to be exported, it might be useful to add methods so that discrete_negloglik can take a model as an argument instead of its paramaters
-"""
-function discrete_negloglik(pp::PP;  μ::Real, ϕ::Real, γ::Real)        # one method for point process with or without marks (model without marks)
+function discrete_negloglik(ts::TS;  μ::Real, ϕ::Real, γ::Real)::Real        # one method for point process with or without marks (model without marks)
     tst = [μ, ϕ, γ] .< 0
     w = [:μ, :ϕ, :γ][tst]
     any(tst) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
 
-    times = pp.times
-    endtime = end_time(pp)
-    starttime = start_time(pp)
+    times = ts.times
+    endtime = end_time(ts)
+    starttime = start_time(ts)
     anytimes= starttime:oneunit(starttime-endtime):endtime
 
-    vol = volfunc(anytimes, pp, γ)     # ν function in Li2020
+    vol = volfunc(anytimes, ts, γ)     # ν function in Li2020
     intens = μ .+ ϕ .* vol       # rate λ in Li2020
     prob = 1 .- exp.(-intens )       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
@@ -56,30 +22,29 @@ function discrete_negloglik(pp::PP;  μ::Real, ϕ::Real, γ::Real)        # one 
     term1 = sum(log.(prob_1)) + sum(log.(prob_0))
  
     return (-term1)
-end 
-
-function discrete_negloglik(sepp::SEPPExpKern)
-    pp = sepp.data
-    isnothing(pp) && error("No data in model, can't compute log-likelihood")
-
-    θ = params(sepp)
-    return discrete_negloglik(pp ; θ...)
 end
 
 
-# one methode for marked process
+function discrete_negloglik(sepp::SEPPExpKern)
+    ts = sepp.data
+    isnothing(ts) && error("No data in model, can't compute log-likelihood")
 
-function discrete_negloglik(mpp::MarkedPointProcess, markdens::SupportedMarksDistributions ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+    θ = params(sepp)
+    return discrete_negloglik(ts ; θ...)
+end
+
+
+function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
     any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
 
-    times = mpp.times
-    endtime = end_time(mpp)
-    starttime = start_time(mpp)
+    times = mts.times
+    endtime = end_time(mts)
+    starttime = start_time(mts)
     anytimes= starttime:oneunit(starttime-endtime):endtime
 
-    vol = volfunc(anytimes, mpp, γ, δ)     # ν function in Li2020
+    vol = volfunc(anytimes, mts, γ, δ)     # ν function in Li2020
     intens =μ .+ ϕ .* vol       # rate λ in Li2020
     prob = 1 .- exp.(-intens )       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
@@ -88,7 +53,7 @@ function discrete_negloglik(mpp::MarkedPointProcess, markdens::SupportedMarksDis
     term1 = sum(log.(prob_1)) + sum(log.(prob_0))
 
     σ = β .+ α .* vol[t_idx]
-    marks = mpp.marks
+    marks = mts.marks
 
     sig_marks = hcat(σ, marks)
 
@@ -105,31 +70,33 @@ end
 
 
 function discrete_negloglik(sempp::SEMPPExpKern)
-    mpp = sempp.data
-    isnothing(mpp) && error("No data in model, can't compute log-likelihood")
+    mts = sempp.data
+    isnothing(mts) && error("No data in model, can't compute log-likelihood")
 
     θ = params(sempp)
     markdens = θ[:markdens]
     delete!(θ, :markdens)
-    return discrete_negloglik(mpp, markdens ; θ...)
+    return discrete_negloglik(mts, markdens ; θ...)
 end
 
-"""
-    discrete_fit!(sepp, pp)
 
-fit a self exciting point process model (whithout marks) to a time series. 
-
-Note that if the process has marks, this method ignores them, that is modelling the ground process as independent of the marks. 
 """
-function discrete_fit!(sepp::SEPP) # generic method either to fit a pp whithout marks or to fit the ground process of an mpp
-    pp=sepp.data
-    isnothing(pp) && error("No data in model, can't fit")
+    discrete_fit!(sepp::SEPP)
+
+Fit a discrete self exciting point process model (whithout marks) to the time series in data, based on MLE. 
+
+Note that if the process has marks, this method ignores them, that is modelling the ground process as independent of the marks.
+Returns the minimal Log-likelihood found. 
+"""
+function discrete_fit!(sepp::SEPP) # generic method either to fit a ts whithout marks or to fit the ground process of an mts
+    ts=sepp.data
+    isnothing(ts) && error("No data in model, can't fit")
 
     model = Model(Ipopt.Optimizer)
     θ = params(sepp)
 
     function to_min(μ, ϕ, γ)
-        return discrete_negloglik(pp, μ = μ, ϕ = ϕ, γ = γ)
+        return discrete_negloglik(ts, μ = μ, ϕ = ϕ, γ = γ)
     end
 
     JuMP.register(model, :to_min, 3, to_min, autodiff=true)
@@ -150,14 +117,15 @@ function discrete_fit!(sepp::SEPP) # generic method either to fit a pp whithout 
     return objective_value(model)
 end
 
-"""
-    discrete_fit!(sepp, pp)
 
-fit a self exciting marked point process model with marks distribution either GPD or EGPpower.
+"""
+    discrete_fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing)
+
+Fit a discrete self exciting marked point process model with marks distribution either GPD or EGPpower. Based on MLE.
 """
 function discrete_fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing) # default xi >= 0
-    mpp = sempp.data
-    isnothing(mpp) && error("No data in model, can't fit")
+    mts = sempp.data
+    isnothing(mts) && error("No data in model, can't fit")
 
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
@@ -165,12 +133,12 @@ function discrete_fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothin
 
 
     function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
-        return discrete_negloglik(mpp, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
+        return discrete_negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
     end
 
 
     function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
-        return discrete_negloglik(mpp, EGPD.EGPpower, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+        return discrete_negloglik(mts, EGPD.EGPpower, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
 

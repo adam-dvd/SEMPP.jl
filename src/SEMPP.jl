@@ -7,9 +7,8 @@ using Ipopt
 using DataFrames, Gadfly
 using Dates
 
-include("Types.jl")
-include("DiscreteHawkesProcess.jl")
-include("HawkesProcess.jl")
+include("Structures.jl")
+include("ParametersEstimation.jl")
 include(joinpath("Plots", "PlotsData.jl"))
 include(joinpath("Plots", "ModelPlots.jl"))
 include(joinpath("Plots", "ValidationPlots.jl"))
