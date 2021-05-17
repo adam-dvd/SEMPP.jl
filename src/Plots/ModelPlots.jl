@@ -5,7 +5,7 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
 
     times = ts.times
     isnothing(from_idx) && (from_idx = 1)
-    isnothing(to_idx) && (to_idx = length(ts))
+    isnothing(to_idx) && (to_idx = length(times))
     starttime = times[from_idx]
     endtime = times[to_idx]
     anytimes = isnothing(step) ? (starttime:oneunit(starttime-endtime):endtime) : (starttime:step:endtime)
