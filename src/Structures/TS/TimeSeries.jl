@@ -3,8 +3,8 @@
 
 Composite type to store time series.
 """
-struct TimeSeries{P <: SupportedTimeTypes} <: TS{P <: SupportedTimeTypes}
-    times::AbstractVector{<:P}
+struct TimeSeries <: TS
+    times::AbstractVector{<:SupportedTimeTypes}
 
     function TimeSeries(times)
         times = reshape(times, (length(times),))

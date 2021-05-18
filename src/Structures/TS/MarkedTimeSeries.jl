@@ -3,9 +3,9 @@
     
 A composite type to store time data associated with marks.
 """
-struct MarkedTimeSeries{P <: SupportedTimeTypes} <: TS{P}
-    times::AbstractVector{<:P}
-    marks::AbstractVector
+struct MarkedTimeSeries <: TS
+    times::AbstractVector{<:SupportedTimeTypes}
+    marks::AbstractVector{<:Real}
 
     function MarkedTimeSeries(times, marks) 
         length(times) == length(marks) || error("times and marks must be the same size")

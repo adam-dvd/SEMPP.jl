@@ -15,7 +15,7 @@ Subtypes are :
     - TimeSeries
     - MarkedTimeSeries
 """
-abstract type TS{P <: SupportedTimeTypes} end
+abstract type TS end
 
 
 """
