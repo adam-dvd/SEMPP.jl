@@ -3,8 +3,8 @@
     
 A composite type to store time data associated with marks.
 """
-struct MarkedTimeSeries <: TS
-    times::AbstractVector
+struct MarkedTimeSeries{P <: SupportedTimeTypes} <: TS{P}
+    times::AbstractVector{<:P}
     marks::AbstractVector
 
     function MarkedTimeSeries(times, marks) 

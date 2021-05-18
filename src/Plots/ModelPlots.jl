@@ -8,7 +8,17 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
     isnothing(to_idx) && (to_idx = length(times))
     starttime = times[from_idx]
     endtime = times[to_idx]
-    anytimes = isnothing(step) ? (starttime:oneunit(starttime-endtime):endtime) : (starttime:step:endtime)
+
+    
+    if isnothing(step)
+        if first(times) isa DateTime
+            anytimes = starttime:Dates.Hour(1):endtime
+        else
+            anytimes = (starttime:oneunit(starttime-endtime):endtime)
+        end
+    else
+        anytimes = (starttime:step:endtime)
+    end
 
     μ = sepp.μ
     ϕ = sepp.ϕ

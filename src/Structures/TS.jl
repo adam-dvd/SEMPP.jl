@@ -1,13 +1,21 @@
 """
-    TS
+    SupportedTimeTypes
 
-Abstract type to store data.
+Types supported for the timestamps data in the time series.
+"""
+SupportedTimeTypes = Union{Real, TimeType}
+
+
+"""
+    TS{P}
+
+Abstract type to store data. P is the type of the time stamps in the stored time series.
 
 Subtypes are :
     - TimeSeries
     - MarkedTimeSeries
 """
-abstract type TS end
+abstract type TS{P <: SupportedTimeTypes} end
 
 
 """
