@@ -9,10 +9,11 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
     starttime = times[from_idx]
     endtime = times[to_idx]
 
-    
+    ((starttime isa TimeType) && !(step isa TimeType)) && (@warn "If times are TimeType step must be TimeType, ignoring step value."; step=nothing)
+
     if isnothing(step)
-        if first(times) isa DateTime
-            anytimes = starttime:Dates.Hour(1):endtime
+        if starttime isa TimeType
+            anytimes = DateTime(starttime):Dates.Hour(1):DateTime(endtime)
         else
             anytimes = (starttime:oneunit(starttime-endtime):endtime)
         end

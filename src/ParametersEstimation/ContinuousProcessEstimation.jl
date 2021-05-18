@@ -8,7 +8,7 @@ function negloglik(ts::TS; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand
     w = [:μ, :ϕ, :γ][tst]
     any(tst) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
     
-    times = first(ts.times) isa TimeType ? Dates.value.(ts.times) : ts.times
+    times = first(ts.times) isa TimeType ? Dates.value.(DateTime.(ts.times)) ./ (1000*3600*24) : ts.times
     starttime = first(times)
     endtime = last(times)
     T = endtime - starttime
@@ -45,7 +45,7 @@ function negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real
     w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
     any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
 
-    times = first(mts.times) isa TimeType ? Dates.value.(mts.times) : mts.times
+    times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
     starttime = first(times)
     endtime = last(times)
     T = endtime - starttime
