@@ -4,6 +4,9 @@
 Compute the negative log-likelihood of ts with parameters in kwargs.
 """
 function negloglik(ts::TS; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())::Real
+    tst = [μ, ϕ, γ] .< 0
+    w = [:μ, :ϕ, :γ][tst]
+    any(tst) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
     
     times = first(ts.times) isa TimeType ? Dates.value.(ts.times) : ts.times
     starttime = first(times)
@@ -38,7 +41,10 @@ end
 Compute the negative log-likelihood of the marked time series with parmaters in kwargs.
 """
 function negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
-    
+    tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
+    w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
+    any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
+
     times = first(mts.times) isa TimeType ? Dates.value.(mts.times) : mts.times
     starttime = first(times)
     endtime = last(times)
