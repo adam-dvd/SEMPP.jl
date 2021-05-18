@@ -3,7 +3,7 @@
 
 Composite type to store time series.
 """
-struct TimeSeries{P <: SupportedTimeTypes} <: TS{P}
+struct TimeSeries{P <: SupportedTimeTypes} <: TS{P <: SupportedTimeTypes}
     times::AbstractVector{<:P}
 
     function TimeSeries(times)
