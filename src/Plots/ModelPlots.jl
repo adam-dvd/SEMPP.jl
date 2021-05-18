@@ -9,7 +9,7 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
     starttime = times[from_idx]
     endtime = times[to_idx]
 
-    ((starttime isa TimeType) && !(step isa TimeType)) && (@warn "If times are TimeType step must be TimeType, ignoring step value."; step=nothing)
+    ((starttime isa TimeType) && !(step isa Union{TimeType, Nothing})) && (@warn "If times are TimeType step must be TimeType, ignoring step value."; step=nothing)
 
     if isnothing(step)
         if starttime isa TimeType
