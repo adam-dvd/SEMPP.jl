@@ -214,7 +214,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     mts = sempp.data
     isnothing(mts) && error("No data in model, can't fit")
 
-    sepp = SEMPPExpKern(TimeSeries(mts.times))
+    sepp = SEPPExpKern(TimeSeries(mts.times))
     fit!(sepp)
     sempp.μ = sepp.μ
     sempp.ϕ = sepp.ϕ
