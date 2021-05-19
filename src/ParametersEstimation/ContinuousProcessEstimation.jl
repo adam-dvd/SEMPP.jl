@@ -160,9 +160,9 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
 
     if markdens == Distributions.GeneralizedPareto
-        JuMP.register(model, :to_min_GPD, 7, to_min, autodiff=true)
+        JuMP.register(model, :to_min_GPD, 7, to_min_GPD, autodiff=true)
     else
-        JuMP.register(model, :to_min_EGPD, 8, to_min, autodiff=true)
+        JuMP.register(model, :to_min_EGPD, 8, to_min_EGPD, autodiff=true)
     end
 
 

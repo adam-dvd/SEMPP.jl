@@ -7,14 +7,14 @@ SupportedMarksDistributions = Union{Type{Distributions.GeneralizedPareto}, Type{
 
 
 """
-SEMPPExpKern(μ, ϕ, γ, markdens, α, β)
+SEMPPExpKern(data, μ, ϕ, γ, markdens, ξ, α, β, κ)
 
 Self-exciting marked point process with exponential kernel model type such that for all t, and all m there is an event in t with mark m with probability λ_g(t)f(m|t)) where :
 ```
 λ_g(t) = μ + ϕ * ν(t)
 ```
 
-with `ν(t) = \\sum_{t_k < t} (1 + δ*m_k) (\\exp(γ(t-t_k))`
+with `ν(t) = \\sum_{t_k < t} (1 + δ*m_k) (\\exp(-γ(t-t_k))`
 
 f(m|t) is markdens with scale `σ_t = β + α * ν(t)`
 
