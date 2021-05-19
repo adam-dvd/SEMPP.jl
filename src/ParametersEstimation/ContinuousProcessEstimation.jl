@@ -214,12 +214,11 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     mts = sempp.data
     isnothing(mts) && error("No data in model, can't fit")
 
-    sepp = SEPPExpKern(TimeSeries(mts.times))
+    sepp = SEPPExpKern(TimeSeries(copy(mts.times)))
     fit!(sepp)
     sempp.μ = sepp.μ
     sempp.ϕ = sepp.ϕ
     sempp.γ = sepp.γ
-    sempp.δ = sepp.δ
 
     if markdens == Distributions.GeneralizedPareto
         df = DataFrame(Marks = mts.marks)
