@@ -150,12 +150,12 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
 
     function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
-        return negloglik(mts, Distributions.GeneralizedPareto, μ, ϕ, γ, δ, ξ, α, β)
+        return negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
     end
 
 
     function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
-        return negloglik(mts, markdens, μ, ϕ, γ, δ, ξ, α, β, κ)
+        return negloglik(mts, markdens, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
 
