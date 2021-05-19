@@ -132,7 +132,7 @@ function fit!(sepp::SEPPExpKern)::Real
     return objective_value(model)
 end
 
-
+#=
 """
     fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing)::Real
 
@@ -143,6 +143,94 @@ Returns the minimal Log-likelihood found.
 function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing)::Real # default xi >= 0
     mts = sempp.data
     isnothing(mts) && error("No data in model, can't fit")
+
+    model = Model(Ipopt.Optimizer)
+    θ = params(sempp)
+    markdens = θ[:markdens]
+
+
+    function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
+        return negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
+    end
+
+
+    function to_min_EGPD(μ, ϕ, γ, δ, ξ, α, β, κ)
+        return negloglik(mts, markdens, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+    end
+
+
+    if markdens == Distributions.GeneralizedPareto
+        JuMP.register(model, :to_min_GPD, 7, to_min_GPD, autodiff=true)
+    else
+        JuMP.register(model, :to_min_EGPD, 8, to_min_EGPD, autodiff=true)
+    end
+
+
+    @variables(model, begin
+        mu >= 0, (start = θ[:μ])
+        phi >= 0, (start = θ[:ϕ])
+        gamma >= 0, (start = θ[:γ])
+        delta >= 0, (start = θ[:δ])
+        alpha >= 0, (start = θ[:α])
+        beta >= 0, (start = θ[:β])
+    end)
+
+    if markdens != Distributions.GeneralizedPareto
+        @variable(model, kappa >= 0, start = θ[:κ])
+    end
+
+    if isnothing(bounds)
+        @variable(model, xi >= 0, start = θ[:ξ])
+    else
+        @variable(model, bounds[1] <= xi <= bounds[2], start = θ[:ξ])
+    end
+
+
+    if markdens == Distributions.GeneralizedPareto
+        @NLobjective(model, Min, to_min_GPD(mu, phi, gamma, delta, xi, alpha, beta))
+    else
+        @NLobjective(model, Min, to_min_EGPD(mu, phi, gamma, delta, xi, alpha, beta, kappa))
+    end
+    
+    optimize!(model)
+
+    sempp.μ = value(mu)
+    sempp.ϕ = value(phi)
+    sempp.γ = value(gamma)
+    sempp.δ = value(gamma)
+    sempp.ξ = value(gamma)
+    sempp.α = value(gamma)
+    sempp.β = value(gamma)
+
+    if markdens != Distributions.GeneralizedPareto
+        sempp.κ = value(kappa)
+    end
+
+    return objective_value(model)
+end
+=#
+
+function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing)::Real # default xi >= 0
+    mts = sempp.data
+    isnothing(mts) && error("No data in model, can't fit")
+
+    sepp = SEMPPExpKern(TimeSeries(mts.times))
+    fit!(sepp)
+    sempp.μ = sepp.μ
+    sempp.ϕ = sepp.ϕ
+    sempp.γ = sepp.γ
+    sempp.δ = sepp.δ
+
+    if markdens == Distributions.GeneralizedPareto
+        df = DataFrame(Marks = mts.marks)
+        gml = gpfit(df, :Marks)
+        sempp.ξ, sempp.α = gml.θ̂
+    else
+        egppower = EGPD.EGPpowerfit(mts.marks)
+        sempp.ξ = egppower.ξ
+        sempp.α = egppower.σ
+        sempp.κ = egppower.κ
+    end
 
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)

@@ -6,6 +6,7 @@ using JuMP
 using Ipopt
 using DataFrames, Gadfly
 using Dates
+using Extremes
 
 include("Structures.jl")
 include("ParametersEstimation.jl")
@@ -31,6 +32,6 @@ export
     discrete_negloglik, negloglik, discrete_fit!, fit!,
 
     # plots
-    rate_plot, pp_prob_plot
+    rate_plot, pp_prob_plot, marks_prob_plot, marks_qq_plot
 
 end # module
