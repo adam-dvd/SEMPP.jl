@@ -220,6 +220,8 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     sempp.ϕ = sepp.ϕ
     sempp.γ = sepp.γ
 
+    markdens = sempp.markdens
+
     if markdens == Distributions.GeneralizedPareto
         df = DataFrame(Marks = mts.marks)
         gml = gpfit(df, :Marks)
