@@ -82,9 +82,9 @@ function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions 
     sig_marks = hcat(σ, marks)
 
     if markdens == Distributions.GeneralizedPareto
-        mark_contrib = (sig_mark -> logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])).(eachrow(sig_marks))
+        mark_contrib = (sig_mark -> logpdf(markdens(0, sig_mark[1], ξ), sig_mark[2])).(eachrow(sig_marks))
     else        # EGPD case
-        mark_contrib = (sig_mark -> logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])).(eachrow(sig_marks))
+        mark_contrib = (sig_mark -> logpdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])).(eachrow(sig_marks))
     end
 
     term3 = sum(mark_contrib)
