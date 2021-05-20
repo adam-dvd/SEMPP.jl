@@ -67,5 +67,3 @@ shape(sepp::SEMPPExpKern) = sepp.κ
 
 
 decay(sepp::SEMPPExpKern) = sepp.ξ
-
-

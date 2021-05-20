@@ -246,9 +246,13 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
-
+#=
     function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
         return negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
+    end
+=#
+    function to_min_GPD(μ, ϕ, γ, δ, ξ, β)
+        return negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = 0, β = β)
     end
 
 
@@ -258,7 +262,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
 
     if markdens == Distributions.GeneralizedPareto
-        JuMP.register(model, :to_min_GPD, 7, to_min_GPD, autodiff=true)
+        JuMP.register(model, :to_min_GPD, 6, to_min_GPD, autodiff=true)
     else
         JuMP.register(model, :to_min_EGPD, 8, to_min_EGPD, autodiff=true)
     end
@@ -269,7 +273,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
         phi >= 0, (start = θ[:ϕ])
         gamma >= 0, (start = θ[:γ])
         delta >= 0, (start = θ[:δ])
-        alpha >= 0, (start = θ[:α])
+        #alpha >= 0, (start = θ[:α])
         beta >= 0, (start = θ[:β])
     end)
 
@@ -285,7 +289,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
 
     if markdens == Distributions.GeneralizedPareto
-        @NLobjective(model, Min, to_min_GPD(mu, phi, gamma, delta, xi, alpha, beta))
+        @NLobjective(model, Min, to_min_GPD(mu, phi, gamma, delta, xi, beta))
     else
         @NLobjective(model, Min, to_min_EGPD(mu, phi, gamma, delta, xi, alpha, beta, kappa))
     end
@@ -297,7 +301,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     sempp.γ = value(gamma)
     sempp.δ = value(gamma)
     sempp.ξ = value(gamma)
-    sempp.α = value(gamma)
+    #sempp.α = value(gamma)
     sempp.β = value(gamma)
 
     if markdens == EGPD.EGPpower
