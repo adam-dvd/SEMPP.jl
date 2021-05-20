@@ -235,7 +235,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     if markdens == Distributions.GeneralizedPareto
         df = DataFrame(Marks = mts.marks)
         gml = gpfit(df, :Marks)
-        sempp.α = exp(gml.θ̂[1])
+        sempp.β = exp(gml.θ̂[1])
         sempp.ξ = gml.θ̂[2]
     else
         egppower = EGPD.EGPpowerfit(mts.marks)
