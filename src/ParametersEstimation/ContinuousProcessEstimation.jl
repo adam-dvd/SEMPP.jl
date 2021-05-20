@@ -34,6 +34,27 @@ function negloglik(sepp::SEPPExpKern)::Real
     return negloglik(ts ; θ...)
 end
 
+#=
+function nlL1(mts::MarkedTimeSeries; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0)
+    tst = [μ, ϕ, γ, δ] .< 0
+    w = [:μ, :ϕ, :γ, :δ][tst]
+    any(tst) && ((μ, ϕ, γ, δ) = abs.((μ, ϕ, γ, δ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
+
+    times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
+    starttime = first(times)
+    endtime = last(times)
+    T = endtime - starttime
+
+    marks = mts.marks
+
+    vol = volfunc(times, mts, γ, δ)
+    
+    term1 = sum(log.(μ .+ ϕ .* vol))
+    term2 = μ * T + ϕ/γ * sum((1 .+ δ .* marks) .* (1 .- exp.(-γ .* (endtime .- times))))
+    
+    return term2 - term1
+end
+=#
 
 """
     negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
@@ -52,7 +73,7 @@ function negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real
 
     marks = mts.marks
 
-    vol = volfunc(times, mts, γ)
+    vol = volfunc(times, mts, γ, δ)
     
     term1 = sum(log.(μ .+ ϕ .* vol))
     term2 = μ * T + ϕ/γ * sum((1 .+ δ .* marks) .* (1 .- exp.(-γ .* (endtime .- times))))
@@ -211,14 +232,9 @@ end
 =#
 
 function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = nothing)::Real # default xi >= 0
+    
     mts = sempp.data
     isnothing(mts) && error("No data in model, can't fit")
-
-    sepp = SEPPExpKern(TimeSeries(copy(mts.times)))
-    fit!(sepp)
-    sempp.μ = sepp.μ
-    sempp.ϕ = sepp.ϕ
-    sempp.γ = sepp.γ
 
     markdens = sempp.markdens
 
@@ -264,7 +280,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
         beta >= 0, (start = θ[:β])
     end)
 
-    if markdens != Distributions.GeneralizedPareto
+    if markdens == EGPD.EGPpower
         @variable(model, kappa >= 0, start = θ[:κ])
     end
 
