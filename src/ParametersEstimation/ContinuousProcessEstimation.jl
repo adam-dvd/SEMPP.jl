@@ -61,7 +61,7 @@ end
 
 Compute the negative log-likelihood of the marked time series with parmaters in kwargs.
 """
-function negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
+function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
     any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
@@ -240,19 +240,16 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     else
         egppower = EGPD.EGPpowerfit(mts.marks)
         sempp.ξ = egppower.ξ
-        sempp.α = egppower.σ
+        sempp.β = egppower.σ
         sempp.κ = egppower.κ
     end
 
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
-#=
+
+
     function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
         return negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
-    end
-=#
-    function to_min_GPD(μ, ϕ, γ, δ, ξ, β)
-        return negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = 0, β = β)
     end
 
 
@@ -262,7 +259,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
 
     if markdens == Distributions.GeneralizedPareto
-        JuMP.register(model, :to_min_GPD, 6, to_min_GPD, autodiff=true)
+        JuMP.register(model, :to_min_GPD, 7, to_min_GPD, autodiff=true)
     else
         JuMP.register(model, :to_min_EGPD, 8, to_min_EGPD, autodiff=true)
     end
@@ -273,7 +270,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
         phi >= 0, (start = θ[:ϕ])
         gamma >= 0, (start = θ[:γ])
         delta >= 0, (start = θ[:δ])
-        #alpha >= 0, (start = θ[:α])
+        alpha >= 0, (start = θ[:α])
         beta >= 0, (start = θ[:β])
     end)
 
@@ -289,7 +286,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
 
     if markdens == Distributions.GeneralizedPareto
-        @NLobjective(model, Min, to_min_GPD(mu, phi, gamma, delta, xi, beta))
+        @NLobjective(model, Min, to_min_GPD(mu, phi, gamma, delta, xi, alpha, beta))
     else
         @NLobjective(model, Min, to_min_EGPD(mu, phi, gamma, delta, xi, alpha, beta, kappa))
     end
@@ -299,10 +296,10 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     sempp.μ = value(mu)
     sempp.ϕ = value(phi)
     sempp.γ = value(gamma)
-    sempp.δ = value(gamma)
-    sempp.ξ = value(gamma)
-    #sempp.α = value(gamma)
-    sempp.β = value(gamma)
+    sempp.δ = value(delta)
+    sempp.ξ = value(xi)
+    sempp.α = value(alpha)
+    sempp.β = value(beta)
 
     if markdens == EGPD.EGPpower
         sempp.κ = value(kappa)
