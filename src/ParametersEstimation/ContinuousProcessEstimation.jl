@@ -79,19 +79,13 @@ function negloglik(mts::MarkedTimeSeries, markdens ; μ::Real = rand(), ϕ::Real
     term2 = μ * T + ϕ/γ * sum((1 .+ δ .* marks) .* (1 .- exp.(-γ .* (endtime .- times))))
 
     σ = β .+ α .* vol
-
-
-    function log_cdf_markdens(sig_mark)
-        if markdens == Distributions.GeneralizedPareto
-            return logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])
-        else        # EGPD case
-            return logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])
-        end
-    end
-
-
     sig_marks = hcat(σ, marks)
-    mark_contrib = log_cdf_markdens.(eachrow(sig_marks))
+
+    if markdens == Distributions.GeneralizedPareto
+        mark_contrib = (sig_mark -> logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])).(eachrow(sig_marks))
+    else        # EGPD case
+        mark_contrib = (sig_mark -> logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])).(eachrow(sig_marks))
+    end
 
     term3 = sum(mark_contrib)
 
@@ -241,7 +235,8 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     if markdens == Distributions.GeneralizedPareto
         df = DataFrame(Marks = mts.marks)
         gml = gpfit(df, :Marks)
-        sempp.ξ, sempp.α = gml.θ̂
+        sempp.α = exp(gml.θ̂[1])
+        sempp.ξ = gml.θ̂[2]
     else
         egppower = EGPD.EGPpowerfit(mts.marks)
         sempp.ξ = egppower.ξ
@@ -251,8 +246,6 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
     model = Model(Ipopt.Optimizer)
     θ = params(sempp)
-    markdens = θ[:markdens]
-
 
     function to_min_GPD(μ, ϕ, γ, δ, ξ, α, β)
         return negloglik(mts, Distributions.GeneralizedPareto, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β)
@@ -307,7 +300,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     sempp.α = value(gamma)
     sempp.β = value(gamma)
 
-    if markdens != Distributions.GeneralizedPareto
+    if markdens == EGPD.EGPpower
         sempp.κ = value(kappa)
     end
 
