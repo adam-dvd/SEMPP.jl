@@ -7,7 +7,7 @@ struct TimeSeries <: TS
     times::AbstractVector{<:SupportedTimeTypes}
 
     function TimeSeries(times)
-        times = reshape(times, (length(times),))
+        times = vec(times)
         return new(times)
     end
 end

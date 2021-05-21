@@ -8,9 +8,9 @@ struct MarkedTimeSeries <: TS
     marks::AbstractVector{<:Real}
 
     function MarkedTimeSeries(times, marks) 
-        length(times) == length(marks) || error("times and marks must be the same size")
-        times = reshape(times, (length(times),))
-        marks = reshape(marks, (length(marks),))
+        length(times) == length(marks) || error("times and marks must be the same length")
+        times = vec(times)
+        marks = vec(marks)
         return new(times, marks)
     end
 end
