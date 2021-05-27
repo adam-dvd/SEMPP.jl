@@ -89,16 +89,16 @@ function marked_rate_plot(sempp::SEMPPExpKern; step = nothing, from_idx = nothin
 
     lamb = μ .+ ϕ .* volfunc(anytimes, mts, γ, δ)
 
-    points = fill(0, (to_idx-from_idx + 1,))
+    # points = fill(0, (to_idx-from_idx + 1,))
     
 
-    rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], Geom.line)
+    rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], alpha = [0.7], Geom.line)
 
     marks_layer = layer(x=times, y=marks, Geom.hair, Geom.point) 
 
-    points_layer = layer(x = times[from_idx:to_idx], y = points, alpha = [0.7], Geom.point)
+    # points_layer = layer(x = times[from_idx:to_idx], y = points, alpha = [0.7], Geom.point)
 
-    plt = plot(rate_layer, marks_layer, points_layer, Theme(grid_line_width=0mm, highlight_width = 0mm)) 
+    plt = plot(rate_layer, marks_layer, Theme(grid_line_width=0mm, highlight_width = 0mm)) 
 
     return plt
 end
