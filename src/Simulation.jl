@@ -6,7 +6,7 @@ Simulate event records from the model.
 function simulation end
 
 
-function simulation(sepp::SEPPExpKern, end_time::Real=10)::TimeSeries
+function simulation(sepp::SEPPExpKern, end_time::Real=1000)::TimeSeries
     
     μ = sepp.μ
     ϕ = sepp.ϕ
@@ -47,8 +47,8 @@ function simulation(sempp::SEMPPExpKern, end_time::Real=10)::MarkedTimeSeries
     β = sempp.β
     κ = sempp.κ
 
-    times = Vector{Float64}[]
-    marks = Vector{Float64}[]
+    times = Float64[]
+    marks = Float64[]
     mts = MarkedTimeSeries(times, marks)
     t = 0
     λ = μ + ϕ * volfunc([t], mts, γ, δ)[1]
@@ -94,7 +94,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::I
     ϕ = sepp.ϕ
     γ = sepp.γ
 
-    times = Vector{Float64}[]
+    times = Float64[]
     ts = TimeSeries(times)
     
     for t in start_time:end_time
@@ -122,8 +122,8 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time:
     β = sempp.β
     κ = sempp.κ
 
-    times = Vector{Float64}[]
-    marks = Vector{Float64}[]
+    times = Float64[]
+    marks = Float64[]
     mts = MarkedTimeSeries(times, marks)
     
     for t in start_time:end_time
