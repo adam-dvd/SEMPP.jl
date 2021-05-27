@@ -12,7 +12,7 @@ function simulation(sepp::SEPPExpKern, end_time::Real=10)::TimeSeries
     ϕ = sepp.ϕ
     γ = sepp.γ
 
-    times = Vector{Float64}[]
+    times = Float64[]
     ts = TimeSeries(times)
     t = 0
     λ = μ + ϕ * volfunc([t], ts, γ)[1]
