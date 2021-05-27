@@ -35,7 +35,7 @@ function simulation(sepp::SEPPExpKern, end_time::Real=1000)::TimeSeries
 end
 
 
-function simulation(sempp::SEMPPExpKern, end_time::Real=10)::MarkedTimeSeries
+function simulation(sempp::SEMPPExpKern, end_time::Real=1000)::MarkedTimeSeries
     
     μ = sempp.μ
     ϕ = sempp.ϕ
@@ -89,7 +89,7 @@ Simulate event records from the model on a discrete timeline.
 function discrete_simulation end
 
 
-function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::Int=100)::TimeSeries
+function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::Int=1000)::TimeSeries
     μ = sepp.μ
     ϕ = sepp.ϕ
     γ = sepp.γ
@@ -111,7 +111,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::I
 end
 
 
-function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time::Int=100)::MarkedTimeSeries
+function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time::Int=1000)::MarkedTimeSeries
     μ = sempp.μ
     ϕ = sempp.ϕ
     γ = sempp.γ

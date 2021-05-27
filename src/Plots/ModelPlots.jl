@@ -40,11 +40,14 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
 end
 
 
-function marks_plot(mts::MarkedTimeSeries)
+function marks_plot(mts::MarkedTimeSeries; from_idx::Union{Nothing, Integer} = nothing, to_idx::Union{Nothing, Integer} = nothing)
     marks = mts.marks
     times = mts.times
 
-    plt = plot(x=times, y=marks, Geom.hair, Geom.point) 
+    isnothing(from_idx) && (from_idx = 1)
+    isnothing(to_idx) && (to_idx = length(times))
+
+    plt = plot(x=times[from_idx:to_idx], y=marks[from_idx:to_idx], Geom.hair, Geom.point) 
 
     return plt
 end
@@ -62,9 +65,9 @@ function marked_rate_plot(sempp::SEMPPExpKern; step = nothing, from_idx = nothin
 
     mts = sempp.data
     isnothing(mts) && error("No data in the model, can't plot")
-    
+    #=
     times = mts.times
-    marks = mts.marks
+    # marks = mts.marks
     isnothing(from_idx) && (from_idx = 1)
     isnothing(to_idx) && (to_idx = length(times))
     starttime = times[from_idx]
@@ -82,6 +85,7 @@ function marked_rate_plot(sempp::SEMPPExpKern; step = nothing, from_idx = nothin
         anytimes = (starttime:step:endtime)
     end
 
+   
     μ = sempp.μ
     ϕ = sempp.ϕ
     γ = sempp.γ
@@ -89,16 +93,18 @@ function marked_rate_plot(sempp::SEMPPExpKern; step = nothing, from_idx = nothin
 
     lamb = μ .+ ϕ .* volfunc(anytimes, mts, γ, δ)
 
-    # points = fill(0, (to_idx-from_idx + 1,))
+     points = fill(0, (to_idx-from_idx + 1,))
+    =#
+
+    rate_plot = rate_plot(sempp, step = step, from_idx = from_idx, to_idx = to_idx)
     
+    # layer(x = anytimes, y = lamb, color = [color("black")], alpha = [0.7], Geom.line, order = 1)
 
-    rate_layer = layer(x = anytimes, y = lamb, color = [color("black")], alpha = [0.7], Geom.line)
-
-    marks_layer = layer(x=times, y=marks, Geom.hair, Geom.point) 
+    marks_plot = marks_plot(mts, from_idx = from_idx, to_idx = to_idx)
 
     # points_layer = layer(x = times[from_idx:to_idx], y = points, alpha = [0.7], Geom.point)
 
-    plt = plot(rate_layer, marks_layer, Theme(grid_line_width=0mm, highlight_width = 0mm)) 
+    plt = vstack(rate_plot, marks_plot) 
 
     return plt
 end
