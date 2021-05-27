@@ -1,9 +1,16 @@
 """
+    DiscreteTimeTypes
+
+Type for discrete time handling.
+"""
+DiscreteTimeTypes = Union{Integer, TimeType}
+
+"""
     SupportedTimeTypes
 
 Types supported for the timestamps data in the time series.
 """
-SupportedTimeTypes = Union{Real, TimeType}
+SupportedTimeTypes = Union{Real, DiscreteTimeTypes}
 
 
 """

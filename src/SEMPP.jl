@@ -7,12 +7,15 @@ using Ipopt
 using DataFrames, Gadfly
 using Dates
 using Extremes
+using Statistics
 
 include("Structures.jl")
 include("ParametersEstimation.jl")
 include(joinpath("Plots", "PlotsData.jl"))
 include(joinpath("Plots", "ModelPlots.jl"))
 include(joinpath("Plots", "ValidationPlots.jl"))
+include("Simulation.jl")
+include("StatisticsEstimation.jl")
 
 export 
     # data types
@@ -32,6 +35,19 @@ export
     discrete_negloglik, negloglik, discrete_fit!, fit!,
 
     # plots
-    rate_plot, pp_prob_plot, marks_prob_plot, marks_qq_plot
+    rate_plot, pp_prob_plot, marks_prob_plot, marks_qq_plot,
+
+    # simulations
+    simulation, discrete_simulation,
+
+    # statistics estimation
+    ## Markov
+    markov_expected_run_length,
+
+    ## Monte Carlo 
+    monte_carlo_return_period,
+
+    ## tail estimation
+    discrete_tail_estimation, tail_estimation
 
 end # module

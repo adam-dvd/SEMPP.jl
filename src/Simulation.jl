@@ -3,7 +3,7 @@
 
 Simulate event records from the model.
 """
-function simulation::TS end
+function simulation end
 
 
 function simulation(sepp::SEPPExpKern, end_time::Real=10)::TimeSeries
@@ -86,7 +86,7 @@ end
 
 Simulate event records from the model on a discrete timeline.
 """
-function discrete_simulation::TS end
+function discrete_simulation end
 
 
 function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::Int=100)::TimeSeries
@@ -111,7 +111,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::I
 end
 
 
-function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time::Int=100)::TimeSeries
+function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time::Int=100)::MarkedTimeSeries
     μ = sempp.μ
     ϕ = sempp.ϕ
     γ = sempp.γ
