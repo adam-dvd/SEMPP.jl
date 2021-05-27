@@ -96,15 +96,15 @@ function marked_rate_plot(sempp::SEMPPExpKern; step = nothing, from_idx = nothin
      points = fill(0, (to_idx-from_idx + 1,))
     =#
 
-    rate_plot = rate_plot(sempp, step = step, from_idx = from_idx, to_idx = to_idx)
+    rate_plt = rate_plot(sempp, step = step, from_idx = from_idx, to_idx = to_idx)
     
     # layer(x = anytimes, y = lamb, color = [color("black")], alpha = [0.7], Geom.line, order = 1)
 
-    marks_plot = marks_plot(mts, from_idx = from_idx, to_idx = to_idx)
+    marks_plt = marks_plot(mts, from_idx = from_idx, to_idx = to_idx)
 
     # points_layer = layer(x = times[from_idx:to_idx], y = points, alpha = [0.7], Geom.point)
 
-    plt = vstack(rate_plot, marks_plot) 
+    plt = vstack(rate_plt, marks_plt) 
 
     return plt
 end
