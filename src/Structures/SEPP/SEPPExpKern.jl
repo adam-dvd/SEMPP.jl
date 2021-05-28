@@ -10,13 +10,14 @@ mutable struct SEPPExpKern <: SEPP
     μ::Real
     ϕ::Real
     γ::Real
+    cov_mat::Union{Array{Float64, 2}, Nothing}
 
 
-    function SEPPExpKern(data::Union{TS, Nothing} = nothing; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand()) 
+    function SEPPExpKern(data::Union{TS, Nothing} = nothing; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), cov_mat::Union{Array{Float64, 2}, Nothing} = nothing) 
         if any((μ, ϕ, γ) .< 0) 
             error("paramaters must be positive or zero")
         else 
-            new(data,μ, ϕ, γ)
+            new(data,μ, ϕ, γ, cov_mat)
         end
     end
 

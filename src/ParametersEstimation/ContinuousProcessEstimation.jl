@@ -143,6 +143,21 @@ function fit!(sepp::SEPPExpKern)::Real
     sepp.μ = value(mu)
     sepp.ϕ = value(phi)
     sepp.γ = value(gamma)
+    x = [sepp.μ, sepp.ϕ, sepp.γ]
+
+    d = NLPEvaluator(model)
+    MathOptInterface.initialize(d, [:Hess])
+    hess_structure = MathOptInterface.hessian_lagrangian_structure(d, values)
+    hess_values = zero(hess_structure)
+    MathOptInterface.eval_hessian_lagrangian(d, hess_values, x, 1, zero(x))
+
+    sepp.cov_mat = zeros(3, 3)
+    
+    for i in 1:length(hess_structure)
+        sepp.cov_mat[hess_structure[i]] += hess_values[i]
+    end
+
+    sepp.cov_mat = inv(sepp.cov_mat)
 
     return objective_value(model)
 end
@@ -231,9 +246,30 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     sempp.α = value(alpha)
     sempp.β = value(beta)
 
+    x = [sepp.μ, sepp.ϕ, sepp.γ, sepp.δ, sepp.ξ, sepp.α, sepp.β]
+
     if markdens == EGPD.EGPpower
         sempp.κ = value(kappa)
+        push!(x, sepp.κ)
     end
+
+    d = NLPEvaluator(model)
+    MathOptInterface.initialize(d, [:Hess])
+    hess_structure = MathOptInterface.hessian_lagrangian_structure(d, values)
+    hess_values = zero(hess_structure)
+    MathOptInterface.eval_hessian_lagrangian(d, hess_values, x, 1, zero(x))
+
+    if markdens == Distributions.GeneralizedPareto
+        sepp.cov_mat = zeros(7, 7)
+    else
+        sepp.cov_mat = zeros(8, 8)
+    end
+    
+    for i in 1:length(hess_structure)
+        sepp.cov_mat[hess_structure[i]] += hess_values[i]
+    end
+
+    sepp.cov_mat = inv(sepp.cov_mat)
 
     return objective_value(model)
 end
