@@ -18,3 +18,6 @@
         @test SEMPP.volfunc(when, mpp, γ, δ) == [0, 3*exp(-1), 3*exp(-2)]
     end
 end
+
+include("ParametersEstimation_tests/DiscreteProcessEstimation_tests.jl")
+include("ParametersEstimation_tests/ContinuousProcessEstimation_tests.jl")

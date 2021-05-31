@@ -34,7 +34,7 @@ function rate_plot(sepp::SEPP; step = nothing, from_idx = nothing, to_idx = noth
 
     points_layer = layer(x = times[from_idx:to_idx], y = points, alpha = [0.7], Geom.point)
 
-    plt = plot(rate_layer, points_layer, Theme(grid_line_width=0mm, highlight_width = 0mm))
+    plt = plot(rate_layer, points_layer, Guide.xlabel("time"), Guide.ylabel("intensity"), Theme(grid_line_width=0mm, highlight_width = 0mm))
 
     return plt
 end
@@ -47,7 +47,7 @@ function marks_plot(mts::MarkedTimeSeries; from_idx::Union{Nothing, Integer} = n
     isnothing(from_idx) && (from_idx = 1)
     isnothing(to_idx) && (to_idx = length(times))
 
-    plt = plot(x=times[from_idx:to_idx], y=marks[from_idx:to_idx], Geom.hair, Geom.point) 
+    plt = plot(x=times[from_idx:to_idx], y=marks[from_idx:to_idx], Geom.hair, Geom.point, Guide.xlabel("time"), Guide.ylabel("marks")) 
 
     return plt
 end
@@ -65,44 +65,10 @@ function marked_rate_plot(sempp::SEMPPExpKern; step = nothing, from_idx = nothin
 
     mts = sempp.data
     isnothing(mts) && error("No data in the model, can't plot")
-    #=
-    times = mts.times
-    # marks = mts.marks
-    isnothing(from_idx) && (from_idx = 1)
-    isnothing(to_idx) && (to_idx = length(times))
-    starttime = times[from_idx]
-    endtime = times[to_idx]
-
-    ((starttime isa TimeType) && !(step isa Union{TimeType, Nothing})) && (@warn "If times are TimeType step must be TimeType, ignoring step value."; step=nothing)
-
-    if isnothing(step)
-        if starttime isa TimeType
-            anytimes = DateTime(starttime):Dates.Hour(1):DateTime(endtime)
-        else
-            anytimes = (starttime:oneunit(starttime-endtime):endtime)
-        end
-    else
-        anytimes = (starttime:step:endtime)
-    end
-
-   
-    μ = sempp.μ
-    ϕ = sempp.ϕ
-    γ = sempp.γ
-    δ = sempp.δ
-
-    lamb = μ .+ ϕ .* volfunc(anytimes, mts, γ, δ)
-
-     points = fill(0, (to_idx-from_idx + 1,))
-    =#
 
     rate_plt = rate_plot(sempp, step = step, from_idx = from_idx, to_idx = to_idx)
-    
-    # layer(x = anytimes, y = lamb, color = [color("black")], alpha = [0.7], Geom.line, order = 1)
 
     marks_plt = marks_plot(mts, from_idx = from_idx, to_idx = to_idx)
-
-    # points_layer = layer(x = times[from_idx:to_idx], y = points, alpha = [0.7], Geom.point)
 
     plt = vstack(rate_plt, marks_plt) 
 

@@ -89,18 +89,46 @@
         @test sempp_gpd.α >=0
         @test sempp_gpd.β >=0
     end
-#=
+
     @testset "Simulation.jl" begin
-        simulated_ts = discrete_simulation(sepp, 100*365)
+
+        @testset "PointProcess" begin
+            simulated_ts = discrete_simulation(sepp, 100*365)
         
-        @test simulated_ts isa TimeSeries
+            @test simulated_ts isa TimeSeries
 
-        sepp_simul = SEPPExpKern(simulated_ts)
-        discrete_fit!(sepp_simul)
+            sepp_simul = SEPPExpKern(simulated_ts)
+            discrete_fit!(sepp_simul)
 
-        @test abs(sepp_simul.μ - sepp.μ) < 10
-        @test abs(sepp_simul.ϕ - sepp.ϕ)
-        @test abs(sepp_simul.γ - sepp.γ)
+            @test abs(sepp_simul.μ - sepp.μ) < 1.96 * sepp_simul.cov_mat[1,1]
+            @test abs(sepp_simul.ϕ - sepp.ϕ) < 1.96 * sepp_simul.cov_mat[2,2]
+            @test abs(sepp_simul.γ - sepp.γ) < 1.96 * sepp_simul.cov_mat[3,3]
+        end
+        
+        @testset "MarkedPointProcess GPD" begin
+            simulated_mts = discrete_simulation(sempp_gpd, 100*365)
+
+            @test simulated_mts isa MarkedTimeSeries
+
+            sempp_gpd_simul = SEMPPExpKern(simulated_mts)
+            discrete_fit!(sempp_gpd_simul)
+
+            @test abs(sempp_gpd_simul.μ - sempp_gpd.μ) < 1.96 * sempp_gpd_simul.cov_mat[1,1]
+            @test abs(sempp_gpd_simul.ϕ - smpp_gpd.ϕ) < 1.96 * sempp_gpd_simul.cov_mat[2,2]
+            @test abs(sempp_gpd_simul.γ - sempp_gpd.γ) < 1.96 * sempp_gpd_simul.cov_mat[3,3]
+        end
+        
+        @testset "MarkedPointProcess EGPD" begin
+            simulated_mts = discrete_simulation(sempp_egpd, 100*365)
+
+            @test simulated_mts isa MarkedTimeSeries
+
+            sempp_egpd_simul = SEMPPExpKern(simulated_mts)
+            discrete_fit!(sempp_egpd_simul)
+
+            @test abs(sempp_egpd_simul.μ - sempp_egpd.μ) < 1.96 * sempp_egpd_simul.cov_mat[1,1]
+            @test abs(sempp_egpd_simul.ϕ - smpp_egpd.ϕ) < 1.96 * sempp_egpd_simul.cov_mat[2,2]
+            @test abs(sempp_egpd_simul.γ - sempp_egpd.γ) < 1.96 * sempp_egpd_simul.cov_mat[3,3]    
+        end
     end
-    =#
 end
