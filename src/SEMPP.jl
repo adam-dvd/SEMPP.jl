@@ -4,6 +4,7 @@ using Distributions
 using EGPD
 using JuMP
 using Ipopt
+using MathOptInterface
 using DataFrames, Gadfly
 using Dates
 using Extremes
