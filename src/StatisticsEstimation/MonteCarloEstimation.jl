@@ -32,14 +32,14 @@ function monte_carlo_return_period(sepp::SEPP, r::Integer = 7, horiz::Integer = 
             if c == 0 || times[i-1] == times[i] - 1
                 c+=1
             else
-                c >= r || (res += 1)
+                c >= r && (res += 1)
                 c=0
             end      
         end
 
-        c >= r || (res += 1)
+        c >= r && (res += 1)
 
-        return 100/res
+        return horiz/res
     end
 
     ret_per = median(count.(sims))
@@ -61,20 +61,20 @@ function monte_carlo_return_period(sepp::SEMPPExpKern, magnitude::Real, r::Integ
         
         res = 0
         c = 0
-        marks[1] >= magnitude || (c = 1)
+        marks[1] >= magnitude && (c = 1)
 
         for i in 2:length(times)
             if (marks[1] >= magnitude) && (c == 0 || times[i-1] == times[i] - 1)
                 c+=1
             else
-                c >= r || (res += 1)
+                c >= r && (res += 1)
                 c=0
             end      
         end
 
-        c >= r || (res += 1)
+        c >= r && (res += 1)
 
-        return res/100
+        return horiz/res
     end
 
     ret_per = median(count.(sims))
