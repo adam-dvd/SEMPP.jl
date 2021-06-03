@@ -17,7 +17,7 @@ function monte_carlo_return_period end
 
 
 function monte_carlo_return_period(sepp::SEPP, r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
-    sims = Vector{TS}[]
+    sims = TS[]
 
     for i in 1:M
         push!(sims, discrete_simulation(sepp; start_time = 0, end_time = horiz))
@@ -49,7 +49,7 @@ end
 
 
 function monte_carlo_return_period(sepp::SEMPPExpKern, magnitude::Real = 0, r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
-    sims = Vector{MarkedTimeSeries}[]
+    sims = MarkedTimeSeries[]
 
     for i in 1:M
         push!(sims, discrete_simulation(sepp; start_time = 0, end_time = horiz))

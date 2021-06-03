@@ -93,7 +93,7 @@
     @testset "Simulation.jl" begin
 
         @testset "PointProcess" begin
-            simulated_ts = discrete_simulation(sepp, 100*365)
+            simulated_ts = discrete_simulation(sepp,  end_time = 100*365)
         
             @test simulated_ts isa TimeSeries
 
@@ -106,7 +106,7 @@
         end
         
         @testset "MarkedPointProcess GPD" begin
-            simulated_mts = discrete_simulation(sempp_gpd, 100*365)
+            simulated_mts = discrete_simulation(sempp_gpd, end_time = 100*365)
 
             @test simulated_mts isa MarkedTimeSeries
 
@@ -119,7 +119,7 @@
         end
         
         @testset "MarkedPointProcess EGPD" begin
-            simulated_mts = discrete_simulation(sempp_egpd, 100*365)
+            simulated_mts = discrete_simulation(sempp_egpd, end_time = 100*365)
 
             @test simulated_mts isa MarkedTimeSeries
 

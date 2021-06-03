@@ -11,9 +11,6 @@
     γ = 1
     δ = 1.0
 
-    GPD = Distributions.GeneralizedPareto
-    EGPD1 = EGPD.EGPpower
-
     ξ = 1.5
     β = 2
     α = 1.1
@@ -31,15 +28,15 @@
     end
 
     @testset "negloglik(mts, mardens ; μ, ϕ, γ, δ, ξ, α, β, κ)" begin
-        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.negloglik(mts, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
-        @test SEMPP.negloglik(mts, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
+        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.negloglik(mts, Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
+        @test SEMPP.negloglik(mts, Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
     end
 
-    sempp_egpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = EGPD1, ξ = ξ, α = α, β = β, κ = κ)
-    sempp_gpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = GPD, ξ = ξ, α = α, β = β)
+    sempp_egpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = EGPD.EGPpower, ξ = ξ, α = α, β = β, κ = κ)
+    sempp_gpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = Distributions.GeneralizedPareto, ξ = ξ, α = α, β = β)
 
     @testset "negloglik(sempp)" begin
-        @test SEMPP.negloglik(sempp_egpd) == SEMPP.negloglik(mts, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+        @test SEMPP.negloglik(sempp_egpd) == SEMPP.negloglik(mts, EGPD.EGPpower, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
     @testset "fit!(sepp)" begin

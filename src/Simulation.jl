@@ -6,7 +6,7 @@ Simulate event records from the model.
 function simulation end
 
 
-function simulation(sepp::SEPPExpKern, end_time::Real=1000)::TimeSeries
+function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000)::TimeSeries
     
     μ = sepp.μ
     ϕ = sepp.ϕ
@@ -35,7 +35,7 @@ function simulation(sepp::SEPPExpKern, end_time::Real=1000)::TimeSeries
 end
 
 
-function simulation(sempp::SEMPPExpKern, end_time::Real=1000)::MarkedTimeSeries
+function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=1000)::MarkedTimeSeries
     
     μ = sempp.μ
     ϕ = sempp.ϕ

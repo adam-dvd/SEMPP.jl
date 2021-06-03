@@ -23,7 +23,7 @@ function volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0)::Abstract
 
         mts_to_t = mts[times .< t, :]
 
-        term(markedpoint) = (1+ δ*markedpoint[2])*exp(-γ*(t-markedpoint[1]))
+        term(markedpoint) = (1 + δ * markedpoint[2]) * exp(-γ * (t - markedpoint[1]))
 
         return sum(term.(eachrow(mts_to_t)))
     end

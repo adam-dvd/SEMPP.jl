@@ -143,11 +143,12 @@ function fit!(sepp::SEPPExpKern)::Real
     sepp.μ = value(mu)
     sepp.ϕ = value(phi)
     sepp.γ = value(gamma)
+    #=
     x = [sepp.μ, sepp.ϕ, sepp.γ]
 
     d = NLPEvaluator(model)
-    MathOptInterface.initialize(d, [:Hess])
-    hess_structure = MathOptInterface.hessian_lagrangian_structure(d, values)
+    MathOptInterface.initialize(d, [:HessVec])
+    hess_structure = MathOptInterface.hessian_lagrangian_structure(d)
     hess_values = zero(hess_structure)
     MathOptInterface.eval_hessian_lagrangian(d, hess_values, x, 1, zero(x))
 
@@ -158,7 +159,7 @@ function fit!(sepp::SEPPExpKern)::Real
     end
 
     sepp.cov_mat = inv(sepp.cov_mat)
-
+    =#
     return objective_value(model)
 end
 
@@ -245,7 +246,7 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     sempp.ξ = value(xi)
     sempp.α = value(alpha)
     sempp.β = value(beta)
-
+    #=
     x = [sempp.μ, sempp.ϕ, sempp.γ, sempp.δ, sempp.ξ, sempp.α, sempp.β]
 
     if markdens == EGPD.EGPpower
@@ -254,8 +255,8 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     end
 
     d = NLPEvaluator(model)
-    MathOptInterface.initialize(d, [:Hess])
-    hess_structure = MathOptInterface.hessian_lagrangian_structure(d, values)
+    MathOptInterface.initialize(d, [:HessVec])
+    hess_structure = MathOptInterface.hessian_lagrangian_structure(d)
     hess_values = zero(hess_structure)
     MathOptInterface.eval_hessian_lagrangian(d, hess_values, x, 1, zero(x))
 
@@ -270,6 +271,6 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     end
 
     sempp.cov_mat = inv(sempp.cov_mat)
-
+    =#
     return objective_value(model)
 end
