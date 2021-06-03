@@ -23,6 +23,8 @@ function monte_carlo_return_period(sepp::SEPP, r::Integer = 7, horiz::Integer = 
         push!(sims, discrete_simulation(sepp; start_time = 0, end_time = horiz))
     end
 
+    warn = 0
+
     function count(ts::TS)::Real
         times = ts.times
         res = 0
@@ -39,10 +41,14 @@ function monte_carlo_return_period(sepp::SEPP, r::Integer = 7, horiz::Integer = 
 
         c >= r && (res += 1)
 
+        res == 0 && (res = 1 ; warn += 1)
+
         return horiz/res
     end
 
     ret_per = median(count.(sims))
+
+    warn == 0 || @warn "no events within horizon for $warn simulation(s)"
 
     return ret_per
 end
@@ -55,13 +61,14 @@ function monte_carlo_return_period(sepp::SEMPPExpKern, magnitude::Real, r::Integ
         push!(sims, discrete_simulation(sepp; start_time = 0, end_time = horiz))
     end
 
+    warn = 0
+
     function count(mts::MarkedTimeSeries)::Real
         times = mts.times
         marks = mts.marks
         
         res = 0
         c = 0
-        warn = 0
         marks[1] >= magnitude && (c = 1)
 
         for i in 2:length(times)
@@ -73,9 +80,9 @@ function monte_carlo_return_period(sepp::SEMPPExpKern, magnitude::Real, r::Integ
             end      
         end
 
-        res == 0 && (res = 1 ; warn += 1)
-
         c >= r && (res += 1)
+
+        res == 0 && (res = 1 ; warn += 1)
 
         return horiz/res
     end
