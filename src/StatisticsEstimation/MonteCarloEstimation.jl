@@ -16,7 +16,7 @@ If the model is an SEMPP and magnitude is given by the user than the method only
 function monte_carlo_return_period end
 
 
-function monte_carlo_return_period(sepp::SEPP, r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
+function monte_carlo_return_period(sepp::SEPP; r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
     sims = TS[]
 
     for i in 1:M
@@ -54,7 +54,7 @@ function monte_carlo_return_period(sepp::SEPP, r::Integer = 7, horiz::Integer = 
 end
 
 
-function monte_carlo_return_period(sepp::SEMPPExpKern, magnitude::Real, r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
+function monte_carlo_return_period(sepp::SEMPPExpKern; magnitude::Real, r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
     sims = MarkedTimeSeries[]
 
     for i in 1:M
