@@ -61,6 +61,7 @@ function monte_carlo_return_period(sepp::SEMPPExpKern, magnitude::Real, r::Integ
         
         res = 0
         c = 0
+        warn = 0
         marks[1] >= magnitude && (c = 1)
 
         for i in 2:length(times)
@@ -72,12 +73,16 @@ function monte_carlo_return_period(sepp::SEMPPExpKern, magnitude::Real, r::Integ
             end      
         end
 
+        res == 0 && (res = 1 ; warn += 1)
+
         c >= r && (res += 1)
 
         return horiz/res
     end
 
     ret_per = median(count.(sims))
+
+    warn == 0 || @warn "no events within horizon for $warn simulation(s)"
 
     return ret_per
 end
