@@ -1,7 +1,12 @@
 @testset "ProcessEstimation.jl" begin
-    when = [1,2,3]
-    times = [1,3]
-    marks = [2, 3]
+    df = CSV.read("Daily__Oct-12-2019_03_30_12PM.csv", DataFrame)
+    dropmissing!(df)
+    df.Value = - df.Value
+    df.Date = (s -> Date(s, "yyyy/mm/dd")).(df.Date)
+    df.Exceedances = (v -> max(0, v + 13.66)).(df.Value)
+    
+    times = df[df.Exceedances .> 0, :Date]
+    marks = df[df.Exceedances .> 0, :Exceedances]
 
     ts = TimeSeries(times)
     mts = MarkedTimeSeries(times, marks)
@@ -28,15 +33,15 @@
     end
 
     @testset "negloglik(mts, mardens ; μ, ϕ, γ, δ, ξ, α, β, κ)" begin
-        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.negloglik(mts, Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
-        @test SEMPP.negloglik(mts, Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
+        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.negloglik(mts, markdens = Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
+        @test SEMPP.negloglik(mts, markdens = Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
     end
 
     sempp_egpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = EGPD.EGPpower, ξ = ξ, α = α, β = β, κ = κ)
     sempp_gpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = Distributions.GeneralizedPareto, ξ = ξ, α = α, β = β)
 
     @testset "negloglik(sempp)" begin
-        @test SEMPP.negloglik(sempp_egpd) == SEMPP.negloglik(mts, EGPD.EGPpower, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+        @test SEMPP.negloglik(sempp_egpd) == SEMPP.negloglik(mts, markdens = EGPD.EGPpower, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
     @testset "fit!(sepp)" begin

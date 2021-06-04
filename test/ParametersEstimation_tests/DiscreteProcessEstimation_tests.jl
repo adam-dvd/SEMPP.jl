@@ -1,19 +1,20 @@
 @testset "DiscreteProcessEstimation.jl" begin
-    when = [1,2,3]
-    times = [1,3]
-    marks = [2, 3]
+    df = CSV.read("Daily__Oct-12-2019_03_30_12PM.csv", DataFrame)
+    dropmissing!(df)
+    df.Value = - df.Value
+    df.Date = (s -> Date(s, "yyyy/mm/dd")).(df.Date)
+    df.Exceedances = (v -> max(0, v + 13.66)).(df.Value)
+    
+    times = df[df.Exceedances .> 0, :Date]
+    marks = df[df.Exceedances .> 0, :Exceedances]
 
     ts = TimeSeries(times)
     mts = MarkedTimeSeries(times, marks)
 
-    μ = 2.0
+    μ = 2
     ϕ = 1
     γ = 1
     δ = 1.0
-
-    GPD = Distributions.GeneralizedPareto
-    EGPD1 = EGPD.EGPpower
-
     ξ = 1.5
     β = 2
     α = 1.1
@@ -31,15 +32,15 @@
     end
 
     @testset "discrete_negloglik(mts, mardens ; μ, ϕ, γ, δ, ξ, α, β, κ)" begin
-        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.discrete_negloglik(mts, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
-        @test SEMPP.discrete_negloglik(mts, GPD, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
+        @test_logs (:warn, "μ γ must be positive or zero, taking absolute value") SEMPP.discrete_negloglik(mts, markdens = Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β)
+        @test SEMPP.discrete_negloglik(mts, markdens = Distributions.GeneralizedPareto, μ = -μ, ϕ = ϕ, γ = -γ, ξ = ξ, α = α, β = β) isa Real
     end
 
-    sempp_egpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = EGPD1, ξ = ξ, α = α, β = β, κ = κ)
-    sempp_gpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = GPD, ξ = ξ, α = α, β = β)
+    sempp_egpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = EGPD.EGPpower, ξ = ξ, α = α, β = β, κ = κ)
+    sempp_gpd = SEMPPExpKern(mts, μ = μ, ϕ = ϕ, γ = γ, δ = δ, markdens = Distributions.GeneralizedPareto, ξ = ξ, α = α, β = β)
 
     @testset "discrete_negloglik(sempp)" begin
-        @test SEMPP.discrete_negloglik(sempp_egpd) == SEMPP.discrete_negloglik(mts, EGPD1, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
+        @test SEMPP.discrete_negloglik(sempp_egpd) == SEMPP.discrete_negloglik(mts, markdens = EGPD.EGPpower, μ = μ, ϕ = ϕ, γ = γ, δ = δ, ξ = ξ, α = α, β = β, κ = κ)
     end
 
     @testset "discrete_fit!(sepp)" begin
@@ -93,42 +94,42 @@
     @testset "Simulation.jl" begin
 
         @testset "PointProcess" begin
-            simulated_ts = discrete_simulation(sepp,  end_time = 100*365)
+            simulated_ts = discrete_simulation(sepp,  end_time = 50*365)
         
             @test simulated_ts isa TimeSeries
 
             sepp_simul = SEPPExpKern(simulated_ts)
             discrete_fit!(sepp_simul)
 
-            @test abs(sepp_simul.μ - sepp.μ) < 1.96 * sepp_simul.cov_mat[1,1]
-            @test abs(sepp_simul.ϕ - sepp.ϕ) < 1.96 * sepp_simul.cov_mat[2,2]
-            @test abs(sepp_simul.γ - sepp.γ) < 1.96 * sepp_simul.cov_mat[3,3]
+            @test abs(sepp_simul.μ - sepp.μ) < 2.576 * sepp_simul.cov_mat[1,1]
+            @test abs(sepp_simul.ϕ - sepp.ϕ) < 2.576 * sepp_simul.cov_mat[2,2]
+            @test abs(sepp_simul.γ - sepp.γ) < 2.576 * sepp_simul.cov_mat[3,3]
         end
         
         @testset "MarkedPointProcess GPD" begin
-            simulated_mts = discrete_simulation(sempp_gpd, end_time = 100*365)
+            simulated_mts = discrete_simulation(sempp_gpd, end_time = 50*365)
 
             @test simulated_mts isa MarkedTimeSeries
 
             sempp_gpd_simul = SEMPPExpKern(simulated_mts)
             discrete_fit!(sempp_gpd_simul)
 
-            @test abs(sempp_gpd_simul.μ - sempp_gpd.μ) < 1.96 * sempp_gpd_simul.cov_mat[1,1]
-            @test abs(sempp_gpd_simul.ϕ - smpp_gpd.ϕ) < 1.96 * sempp_gpd_simul.cov_mat[2,2]
-            @test abs(sempp_gpd_simul.γ - sempp_gpd.γ) < 1.96 * sempp_gpd_simul.cov_mat[3,3]
+            @test abs(sempp_gpd_simul.μ - sempp_gpd.μ) < 2.576 * sempp_gpd_simul.cov_mat[1,1]
+            @test abs(sempp_gpd_simul.ϕ - smpp_gpd.ϕ) < 2.576 * sempp_gpd_simul.cov_mat[2,2]
+            @test abs(sempp_gpd_simul.γ - sempp_gpd.γ) < 2.576 * sempp_gpd_simul.cov_mat[3,3]
         end
         
         @testset "MarkedPointProcess EGPD" begin
-            simulated_mts = discrete_simulation(sempp_egpd, end_time = 100*365)
+            simulated_mts = discrete_simulation(sempp_egpd, end_time = 50*365)
 
             @test simulated_mts isa MarkedTimeSeries
 
             sempp_egpd_simul = SEMPPExpKern(simulated_mts)
             discrete_fit!(sempp_egpd_simul)
 
-            @test abs(sempp_egpd_simul.μ - sempp_egpd.μ) < 1.96 * sempp_egpd_simul.cov_mat[1,1]
-            @test abs(sempp_egpd_simul.ϕ - smpp_egpd.ϕ) < 1.96 * sempp_egpd_simul.cov_mat[2,2]
-            @test abs(sempp_egpd_simul.γ - sempp_egpd.γ) < 1.96 * sempp_egpd_simul.cov_mat[3,3]    
+            @test abs(sempp_egpd_simul.μ - sempp_egpd.μ) < 2.576 * sempp_egpd_simul.cov_mat[1,1]
+            @test abs(sempp_egpd_simul.ϕ - smpp_egpd.ϕ) < 2.576 * sempp_egpd_simul.cov_mat[2,2]
+            @test abs(sempp_egpd_simul.γ - sempp_egpd.γ) < 2.576 * sempp_egpd_simul.cov_mat[3,3]    
         end
     end
 end
