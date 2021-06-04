@@ -5,9 +5,8 @@ Compute the negative log-likelihood of ts with parameters in kwargs.
 """
 function negloglik(ts::TS; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand())::Real
     tst = [μ, ϕ, γ] .< 0
-    w = [:μ, :ϕ, :γ][tst]
-    any(tst) && ((μ, ϕ, γ) = abs.((μ, ϕ, γ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
-    
+    any(tst) && (return Inf)
+
     times = first(ts.times) isa TimeType ? Dates.value.(DateTime.(ts.times)) ./ (1000*3600*24) : ts.times
     starttime = first(times)
     endtime = last(times)
@@ -63,8 +62,7 @@ Compute the negative log-likelihood of the marked time series with parmaters in 
 """
 function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
-    w = [:μ, :ϕ, :γ, :δ, :β, :α, :κ][tst]
-    any(tst) && ((μ, ϕ, γ, δ, β, α, κ) = abs.((μ, ϕ, γ, δ, β, α, κ)) ; @warn string(string(["$symb " for symb in w]...), "must be positive or zero, taking absolute value"))
+    any(tst) && (return Inf)
 
     times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
     starttime = first(times)
@@ -143,23 +141,15 @@ function fit!(sepp::SEPPExpKern)::Real
     sepp.μ = value(mu)
     sepp.ϕ = value(phi)
     sepp.γ = value(gamma)
-    #=
+    
     x = [sepp.μ, sepp.ϕ, sepp.γ]
 
-    d = NLPEvaluator(model)
-    MathOptInterface.initialize(d, [:HessVec])
-    hess_structure = MathOptInterface.hessian_lagrangian_structure(d)
-    hess_values = zero(hess_structure)
-    MathOptInterface.eval_hessian_lagrangian(d, hess_values, x, 1, zero(x))
+    to_hess(θ) = to_min(θ...)
 
-    sepp.cov_mat = zeros(3, 3)
-    
-    for i in 1:length(hess_structure)
-        sepp.cov_mat[hess_structure[i]] += hess_values[i]
-    end
+    hess = ForwardDiff.hessian(to_hess, x)
 
-    sepp.cov_mat = inv(sepp.cov_mat)
-    =#
+    sepp.cov_mat = inv(hess)
+
     return objective_value(model)
 end
 
@@ -246,31 +236,20 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
     sempp.ξ = value(xi)
     sempp.α = value(alpha)
     sempp.β = value(beta)
-    #=
+    
     x = [sempp.μ, sempp.ϕ, sempp.γ, sempp.δ, sempp.ξ, sempp.α, sempp.β]
 
-    if markdens == EGPD.EGPpower
+    if markdens == Distributions.GeneralizedPareto
+        to_hess1(θ) = to_min_GPD(θ...)
+        hess = ForwardDiff.hessian(to_hess1, x)
+    else
         sempp.κ = value(kappa)
         push!(x, sempp.κ)
+        to_hess2(θ) = to_min_EGPD(θ...)
+        hess = ForwardDiff.hessian(to_hess2, x)
     end
 
-    d = NLPEvaluator(model)
-    MathOptInterface.initialize(d, [:HessVec])
-    hess_structure = MathOptInterface.hessian_lagrangian_structure(d)
-    hess_values = zero(hess_structure)
-    MathOptInterface.eval_hessian_lagrangian(d, hess_values, x, 1, zero(x))
+    sepp.cov_mat = inv(hess)
 
-    if markdens == Distributions.GeneralizedPareto
-        sempp.cov_mat = zeros(7, 7)
-    else
-        sempp.cov_mat = zeros(8, 8)
-    end
-    
-    for i in 1:length(hess_structure)
-        sempp.cov_mat[hess_structure[i]] += hess_values[i]
-    end
-
-    sempp.cov_mat = inv(sempp.cov_mat)
-    =#
     return objective_value(model)
 end
