@@ -14,7 +14,7 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
 
     times = Float64[]
     ts = TimeSeries(times)
-    t = 0
+    t = start_time
     λ = μ + ϕ * volfunc([t], ts, γ)[1]
 
     while t <= end_time
@@ -50,7 +50,7 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
     times = Float64[]
     marks = Float64[]
     mts = MarkedTimeSeries(times, marks)
-    t = 0
+    t = start_time
     λ = μ + ϕ * volfunc([t], mts, γ, δ)[1]
 
     while t <= end_time
