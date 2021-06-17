@@ -77,7 +77,6 @@ function discrete_negloglik(sempp::SEMPPExpKern)
     return discrete_negloglik(mts, markdens ; θ...)
 end
 
-
 """
     discrete_fit!(sepp::SEPP)
 
@@ -86,7 +85,22 @@ Fit a discrete self exciting point process model (whithout marks) to the time se
 Note that if the process has marks, this method ignores them, that is modelling the ground process as independent of the marks.
 Returns the minimal Log-likelihood found. 
 """
-function discrete_fit!(sepp::SEPP) # generic method either to fit a ts whithout marks or to fit the ground process of an mts
+function discrete_fit! end
+
+include("macro_def_fits.jl")
+
+@def_discrete_fit_sepp [:s1]
+@def_discrete_fit_sepp [:s1, :s2]
+@def_discrete_fit_sepp [:s1, :s2, :s3]
+
+
+function discrete_fit!(sepp::SEPP)
+    return discrete_fit!(sepp, :μ, :ϕ, :γ)
+end
+
+
+#=
+function discrete_fit!(sepp::SEPP, params_to_fit::Symbol...) # generic method either to fit a ts whithout marks or to fit the ground process of an mts
     ts=sepp.data
     isnothing(ts) && error("No data in model, can't fit")
 
@@ -122,6 +136,7 @@ function discrete_fit!(sepp::SEPP) # generic method either to fit a ts whithout 
 
     return objective_value(model)
 end
+=#
 
 
 """
@@ -207,3 +222,60 @@ function discrete_fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothin
 
     return objective_value(model)
 end
+
+
+
+
+#=
+### TESTS
+
+fun(;x=1, y=2) = x + y
+
+val = [11, 12]
+
+macro var(ex)
+    d = Dict()
+        for s in ex.args
+            d[QuoteNode(s)] = s
+        end
+    return quote
+        function tm($(ex.args...))
+            return fun(;d...)
+        end
+    end
+end
+
+macro tst(ex)
+    l = eval(ex)
+    return Expr(:function, Expr(:call, :f, l...), quote
+        return obj($(l...))
+    end)
+end
+
+macro tst2(ex)
+    l = eval(ex)
+    d = Dict()
+    for i in 1:length(l)
+        d[l[i]] = l[i]
+    end
+    Expr(:call, :Dict, )
+    return Expr(:function, Expr(:call, :f, l...), quote
+        return obj(;[l[i] = l[i] for i in 1:length(l)]...)
+    end)
+end
+
+
+## fonctionne :
+macro tst2(ex)
+    l = eval(ex)
+    x = Symbol[]
+    kw = Expr[]
+    for i in 1:length(l)
+        push!(x, Symbol("x$i"))
+        push!(kw, Expr(Symbol("="), esc(l[i]), Symbol("x$i")))
+    end
+        return Expr(:function, Expr(:call, :f, x...), quote
+        return obj(;$(kw...))
+    end)
+    end
+    =#
