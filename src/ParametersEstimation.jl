@@ -25,6 +25,8 @@ function volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0)::Abstract
 
         term(markedpoint) = (1 + δ * markedpoint[2]) * exp(-γ * (t - markedpoint[1]))
 
+        isempty(mts_to_t) && return 0
+
         return sum(term.(eachrow(mts_to_t)))
     end
 

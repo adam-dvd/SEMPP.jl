@@ -26,6 +26,7 @@ mutable struct SEMPPExpKern <: SEPP
     ϕ::Real
     γ::Real
     δ::Real
+    impact_function::Function
     markdens::SupportedMarksDistributions
     ξ::Real
     α::Real
@@ -34,11 +35,11 @@ mutable struct SEMPPExpKern <: SEPP
     cov_mat::Union{Array{Float64, 2}, Nothing}
 
 
-    function SEMPPExpKern(data::Union{MarkedTimeSeries, Nothing} = nothing; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), markdens::SupportedMarksDistributions = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand(), cov_mat::Union{Array{Float64, 2}, Nothing} = nothing)
+    function SEMPPExpKern(data::Union{MarkedTimeSeries, Nothing} = nothing; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = rand(), impact_function::Function = (d -> 1 + exp(-d)), markdens::SupportedMarksDistributions = Distributions.GeneralizedPareto, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = rand(), cov_mat::Union{Array{Float64, 2}, Nothing} = nothing)
         if any((μ, ϕ, γ, α, β, δ, κ) .< 0)
             error("paramaters except for ξ must be positive or zero") 
         else 
-            new(data, μ, ϕ, γ, δ, markdens, ξ, α, β, κ, cov_mat)
+            new(data, μ, ϕ, γ, δ, impact_function, markdens, ξ, α, β, κ, cov_mat)
         end
     end
 
