@@ -94,10 +94,22 @@ include("macro_def_fits.jl")
 @def_discrete_fit_sepp [:s1, :s2, :s3]
 
 
-function discrete_fit!(sepp::SEPP)
+function discrete_fit!(sepp::SEPPExpKern)
     return discrete_fit!(sepp, :μ, :ϕ, :γ)
 end
 
+
+@def_discrete_fit_sempp [:s1]
+@def_discrete_fit_sempp [:s1, :s2]
+@def_discrete_fit_sempp [:s1, :s2, :s3, :s4]
+@def_discrete_fit_sempp [:s1, :s2, :s3, :s4, :s5]
+@def_discrete_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6]
+@def_discrete_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6, :s7]
+@def_discrete_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6, :s7, :s8]
+
+function discrete_fit!(sempp::SEMPPExpKern)
+    return discrete_fit!(sempp, :μ, :ϕ, :γ, :ξ, :α, :β)
+end
 
 #=
 function discrete_fit!(sepp::SEPP, params_to_fit::Symbol...) # generic method either to fit a ts whithout marks or to fit the ground process of an mts
@@ -136,7 +148,7 @@ function discrete_fit!(sepp::SEPP, params_to_fit::Symbol...) # generic method ei
 
     return objective_value(model)
 end
-=#
+
 
 
 """
@@ -223,59 +235,4 @@ function discrete_fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothin
     return objective_value(model)
 end
 
-
-
-
-#=
-### TESTS
-
-fun(;x=1, y=2) = x + y
-
-val = [11, 12]
-
-macro var(ex)
-    d = Dict()
-        for s in ex.args
-            d[QuoteNode(s)] = s
-        end
-    return quote
-        function tm($(ex.args...))
-            return fun(;d...)
-        end
-    end
-end
-
-macro tst(ex)
-    l = eval(ex)
-    return Expr(:function, Expr(:call, :f, l...), quote
-        return obj($(l...))
-    end)
-end
-
-macro tst2(ex)
-    l = eval(ex)
-    d = Dict()
-    for i in 1:length(l)
-        d[l[i]] = l[i]
-    end
-    Expr(:call, :Dict, )
-    return Expr(:function, Expr(:call, :f, l...), quote
-        return obj(;[l[i] = l[i] for i in 1:length(l)]...)
-    end)
-end
-
-
-## fonctionne :
-macro tst2(ex)
-    l = eval(ex)
-    x = Symbol[]
-    kw = Expr[]
-    for i in 1:length(l)
-        push!(x, Symbol("x$i"))
-        push!(kw, Expr(Symbol("="), esc(l[i]), Symbol("x$i")))
-    end
-        return Expr(:function, Expr(:call, :f, x...), quote
-        return obj(;$(kw...))
-    end)
-    end
-    =#
+=#
