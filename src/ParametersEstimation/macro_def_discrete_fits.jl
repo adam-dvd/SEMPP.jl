@@ -74,7 +74,7 @@ macro def_discrete_fit_sempp(params_to_fit)
     x = Symbol[]
     variables = :(@variable(model, $(Symbol("y1")) >= 0, start = θ[$(l[1])]))
     
-    fitted_params = :(setproperty!(sepp, $(l[1]), value($(Symbol("y1")))))
+    fitted_params = :(setproperty!(sempp, $(l[1]), value($(Symbol("y1")))))
 
     h_it = Expr[]
 
@@ -86,13 +86,13 @@ macro def_discrete_fit_sempp(params_to_fit)
         push!(x, Symbol("x$i"))
         push!(opt_var, Symbol("y$i"))
         push!(kw_expr_it, :($(l[i]) => $(Symbol("x$i"))))
-        push!(h_it, :(getproperty(sepp, $(l[i]))))
+        push!(h_it, :(getproperty(sempp, $(l[i]))))
     end
 
     for i in 2:length(l)
         variables = :($variables ; @variable(model, $(Symbol("y$i")) >= 0, start = θ[$(l[i])]))
 
-        fitted_params = :($fitted_params ; $(:(setproperty!(sepp, $(l[i]), value($(Symbol("y$i")))))))
+        fitted_params = :($fitted_params ; $(:(setproperty!(sempp, $(l[i]), value($(Symbol("y$i")))))))
     end
 
     kw_expr = :(kw = Dict($(kw_expr_it...)))
