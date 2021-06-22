@@ -33,7 +33,7 @@ function discrete_negloglik(sepp::SEPPExpKern)
 end
 
 
-function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> 1 + exp(-d)) ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     any(tst) && (return Inf)
 
@@ -42,7 +42,7 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
     starttime = start_time(mts)
     anytimes= starttime:oneunit(starttime-endtime):endtime
 
-    vol = volfunc(anytimes, mts, γ, δ)     # ν function in Li2020
+    vol = volfunc(anytimes, mts, γ, impact_func, δ)     # ν function in Li2020
     intens =μ .+ ϕ .* vol       # rate λ in Li2020
     prob = 1 .- exp.(-intens )       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
@@ -73,8 +73,10 @@ function discrete_negloglik(sempp::SEMPPExpKern)
 
     θ = params(sempp)
     markdens = θ[:markdens]
+    impact_func = θ[:impact_function]
     delete!(θ, :markdens)
-    return discrete_negloglik(mts, markdens ; θ...)
+    delete!(θ, :impact_function)
+    return discrete_negloglik(mts, markdens, impact_func ; θ...)
 end
 
 """

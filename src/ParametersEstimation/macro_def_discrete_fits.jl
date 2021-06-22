@@ -101,7 +101,7 @@ macro def_discrete_fit_sempp(params_to_fit)
         default_kw = Dict{Symbol, Real}(:μ => θ[:μ], :ϕ => θ[:ϕ], :γ => θ[:γ], :δ => θ[:δ], :ξ => θ[:ξ], :β => θ[:β], :α => θ[:α], :κ => θ[:κ])
         $kw_expr
         final_kw = merge(default_kw, kw)
-        return discrete_negloglik(mts, markdens; final_kw...)
+        return discrete_negloglik(mts, markdens, impact_func; final_kw...)
     end)
 
     h = :([$(h_it...)])
@@ -116,6 +116,7 @@ macro def_discrete_fit_sempp(params_to_fit)
         model = Model(Ipopt.Optimizer)
         θ = params(sempp)
         markdens = θ[:markdens]
+        impact_func = θ[:impact_function]
         
         $to_min_expr
         
