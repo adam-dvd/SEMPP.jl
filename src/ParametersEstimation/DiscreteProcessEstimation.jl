@@ -87,7 +87,7 @@ Returns the minimal Log-likelihood found.
 """
 function discrete_fit! end
 
-include("macro_def_fits.jl")
+include("macro_def_discrete_fits.jl")
 
 @def_discrete_fit_sepp [:s1]
 @def_discrete_fit_sepp [:s1, :s2]
