@@ -43,8 +43,9 @@ function pp_analysis(sepp::SEPP)
     ϕ = sepp.ϕ
     γ = sepp.γ
     δ = sepp isa SEMPPExpKern ? sepp.δ : 0
+    impact_func = sepp isa SEMPPExpKern ? sepp.impact_function : (_ -> 1)
 
-    aux(i) = sum((1 .+ δ .* marks[1:i]) .* (1 .- exp.(-γ .*(times[i] .- times[1:i]))))
+    aux(i) = sum(impact_func.(δ .* marks[1:i]) .* (1 .- exp.(-γ .*(times[i] .- times[1:i]))))
 
     τs = μ .* (times .- starttime) .+ ϕ/γ .* aux.(collect(1:length(times)))
 
