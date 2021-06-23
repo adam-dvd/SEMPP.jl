@@ -43,7 +43,7 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
     anytimes= starttime:oneunit(starttime-endtime):endtime
 
     vol = volfunc(anytimes, mts, γ, δ, impact_func)     # ν function in Li2020
-    intens =μ .+ ϕ .* vol       # rate λ in Li2020
+    intens = μ .+ ϕ .* vol       # rate λ in Li2020
     prob = 1 .- exp.(-intens )       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
     prob_1 = prob[t_idx]        # probability of the events that happened to happen
