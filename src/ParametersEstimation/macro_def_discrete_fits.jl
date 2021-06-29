@@ -73,6 +73,7 @@ macro def_discrete_fit_sempp(params_to_fit)
     l = (qn -> qn.value).(params_to_fit.args)
     x = Symbol[]
     variables = :(@variable(model, $(Symbol("y1")) >= 0, start = θ[$(l[1])]))
+    constraints = :(@constraint(model, $(Symbol("y1")) >= 0))
     
     fitted_params = :(setproperty!(sempp, $(l[1]), value($(Symbol("y1")))))
 
@@ -92,6 +93,8 @@ macro def_discrete_fit_sempp(params_to_fit)
     for i in 2:length(l)
         variables = :($variables ; @variable(model, $(Symbol("y$i")) >= 0, start = θ[$(l[i])]))
 
+        constraints = :($constraints ;  @constraint(model, $(Symbol("y$i")) >= 0))
+
         fitted_params = :($fitted_params ; $(:(setproperty!(sempp, $(l[i]), value($(Symbol("y$i")))))))
     end
 
@@ -101,19 +104,24 @@ macro def_discrete_fit_sempp(params_to_fit)
         default_kw = Dict{Symbol, Real}(:μ => θ[:μ], :ϕ => θ[:ϕ], :γ => θ[:γ], :δ => θ[:δ], :ξ => θ[:ξ], :β => θ[:β], :α => θ[:α], :κ => θ[:κ])
         $kw_expr
         final_kw = merge(default_kw, kw)
-        return discrete_negloglik(mts, markdens, impact_func; final_kw...)
+        println(final_kw)
+        d=discrete_negloglik(mts, markdens, impact_func; final_kw...)
+        println(d)
+        return d
     end)
 
     h = :([$(h_it...)])
 
     m = esc.(l)
 
-    return Expr(:function, Expr(:call, :($(esc(:discrete_fit!))), Expr(Symbol("::"), :sempp, :SEMPPExpKern), m...),quote
+    return Expr(:function, Expr(:call, :($(esc(:discrete_fit!))), Expr(:parameters, Expr(:kw, :tol, 10^(-7))), Expr(Symbol("::"), :sempp, :SEMPPExpKern), m...),quote
         
         mts = sempp.data
         isnothing(mts) && error("No data in model, can't fit")
 
         model = Model(Ipopt.Optimizer)
+        set_optimizer_attribute(model, "tol", tol)
+
         θ = params(sempp)
         markdens = θ[:markdens]
         impact_func = θ[:impact_function]
