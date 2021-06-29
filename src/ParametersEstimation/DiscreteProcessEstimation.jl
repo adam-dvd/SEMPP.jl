@@ -5,7 +5,11 @@ Compute the negative log-likelihood of the process in argument.
 """
 function discrete_negloglik(ts::TS;  μ::Real, ϕ::Real, γ::Real)::Real        # one method for point process with or without marks (model without marks)
     tst = [μ, ϕ, γ] .< 0
-    any(tst) && (return Inf)
+    if any(tst)
+        μ = abs(μ)
+        ϕ = abs(ϕ)
+        γ = abs(γ)
+    end
 
     times = ts.times
     endtime = end_time(ts)
@@ -35,7 +39,15 @@ end
 
 function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> 1 + exp(-d)) ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
-    any(tst) && (return Inf)
+    if any(tst)
+        μ = abs(μ)
+        ϕ = abs(ϕ)
+        γ = abs(γ)
+        δ = abs(δ)
+        β = abs(β)
+        α = abs(α)
+        κ = abs(κ)
+    end
 
     times = mts.times
     endtime = end_time(mts)
