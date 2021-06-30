@@ -11,10 +11,10 @@ function discrete_negloglik(ts::TS;  μ::Real, ϕ::Real, γ::Real)::Real        
         γ = abs(γ)
     end
 
-    times = ts.times
-    endtime = end_time(ts)
-    starttime = start_time(ts)
-    anytimes= starttime:oneunit(starttime-endtime):endtime
+    times = first(ts.times) isa TimeType ? Dates.value.(DateTime.(ts.times)) ./ (1000*3600*24) : ts.times
+    starttime = first(times)
+    endtime = last(times)
+    anytimes = starttime:oneunit(starttime-endtime):endtime
 
     vol = volfunc(anytimes, ts, γ)     # ν function in Li2020
     intens = μ .+ ϕ .* vol       # rate λ in Li2020
@@ -49,9 +49,9 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
         κ = abs(κ)
     end
 
-    times = mts.times
-    endtime = end_time(mts)
-    starttime = start_time(mts)
+    times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
+    starttime = first(times)
+    endtime = last(times)
     anytimes= starttime:oneunit(starttime-endtime):endtime
 
     vol = volfunc(anytimes, mts, γ, δ, impact_func)     # ν function in Li2020
@@ -68,9 +68,9 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
     sig_marks = hcat(σ, marks)
 
     if markdens == Distributions.GeneralizedPareto
-        mark_contrib = (sig_mark -> logcdf(markdens(0, sig_mark[1], ξ), sig_mark[2])).(eachrow(sig_marks))
+        mark_contrib = (sig_mark -> logpdf(markdens(0, sig_mark[1], ξ), sig_mark[2])).(eachrow(sig_marks))
     else        # EGPpower case
-        mark_contrib = (sig_mark -> logcdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])).(eachrow(sig_marks))
+        mark_contrib = (sig_mark -> logpdf(markdens(sig_mark[1], ξ, κ), sig_mark[2])).(eachrow(sig_marks))
     end
 
     term2 = sum(mark_contrib)
