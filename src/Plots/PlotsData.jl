@@ -72,13 +72,14 @@ function transformed_marks_ecdf(sempp::SEMPPExpKern)
     
     γ = sempp.γ
     δ = sempp.δ
+    impact_func = sempp.impact_function
     markdens = sempp.markdens
     ξ = sempp.ξ
     α = sempp.α
     β = sempp.β
     κ = sempp.κ
 
-    vol = volfunc(times, mts, γ, δ)
+    vol = volfunc(times, mts, γ, δ, impact_func)
     σ = β .+ α .* vol
 
     sigmarks = hcat(σ, marks)
