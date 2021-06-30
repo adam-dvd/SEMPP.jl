@@ -104,10 +104,7 @@ macro def_discrete_fit_sempp(params_to_fit)
         default_kw = Dict{Symbol, Real}(:μ => θ[:μ], :ϕ => θ[:ϕ], :γ => θ[:γ], :δ => θ[:δ], :ξ => θ[:ξ], :β => θ[:β], :α => θ[:α], :κ => θ[:κ])
         $kw_expr
         final_kw = merge(default_kw, kw)
-        println(final_kw)
-        d=discrete_negloglik(mts, markdens, impact_func; final_kw...)
-        println(d)
-        return d
+        return discrete_negloglik(mts, markdens, impact_func; final_kw...)
     end)
 
     h = :([$(h_it...)])
