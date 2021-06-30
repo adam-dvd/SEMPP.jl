@@ -111,7 +111,7 @@ macro def_discrete_fit_sempp(params_to_fit)
 
     m = esc.(l)
 
-    return Expr(:function, Expr(:call, :($(esc(:discrete_fit!))), Expr(:parameters, Expr(:kw, :tol, 10^(-7))), Expr(Symbol("::"), :sempp, :SEMPPExpKern), m...),quote
+    return Expr(:function, Expr(:call, :($(esc(:discrete_fit!))), Expr(:parameters, Expr(:kw, :tol, 10^(-8))), Expr(Symbol("::"), :sempp, :SEMPPExpKern), m...),quote
         
         mts = sempp.data
         isnothing(mts) && error("No data in model, can't fit")
