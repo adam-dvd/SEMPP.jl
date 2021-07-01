@@ -5,11 +5,7 @@ Compute the negative log-likelihood of the process in argument.
 """
 function discrete_negloglik(ts::TS;  μ::Real, ϕ::Real, γ::Real)::Real        # one method for point process with or without marks (model without marks)
     tst = [μ, ϕ, γ] .< 0
-    if any(tst)
-        μ = abs(μ)
-        ϕ = abs(ϕ)
-        γ = abs(γ)
-    end
+    any(tst) && (return Inf)
 
     times = first(ts.times) isa TimeType ? Dates.value.(DateTime.(ts.times)) ./ (1000*3600*24) : ts.times
     starttime = first(times)
