@@ -39,6 +39,9 @@ end
 
 function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> 1 + exp(-d)) ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
+    any(tst) && (return Inf)
+
+    #=
     if any(tst)
         μ = abs(μ)
         ϕ = abs(ϕ)
@@ -48,6 +51,7 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
         α = abs(α)
         κ = abs(κ)
     end
+    =#
 
     times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
     starttime = first(times)
@@ -115,6 +119,7 @@ end
 
 @def_discrete_fit_sempp [:s1]
 @def_discrete_fit_sempp [:s1, :s2]
+@def_discrete_fit_sempp [:s1, :s2, :s3]
 @def_discrete_fit_sempp [:s1, :s2, :s3, :s4]
 @def_discrete_fit_sempp [:s1, :s2, :s3, :s4, :s5]
 @def_discrete_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6]
@@ -122,7 +127,7 @@ end
 @def_discrete_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6, :s7, :s8]
 
 function discrete_fit!(sempp::SEMPPExpKern)
-    return discrete_fit!(sempp, :μ, :ϕ, :γ, :ξ, :α, :β)
+    return discrete_fit!(sempp, :μ, :ϕ, :γ, :δ, :ξ, :α, :β)
 end
 
 #=
