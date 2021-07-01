@@ -18,7 +18,7 @@ function discrete_negloglik(ts::TS;  μ::Real, ϕ::Real, γ::Real)::Real        
 
     vol = volfunc(anytimes, ts, γ)     # ν function in Li2020
     intens = μ .+ ϕ .* vol       # rate λ in Li2020
-    prob = 1 .- exp.(-intens )       # probability for an event to happen
+    prob = 1 .- exp.(-intens)       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
     prob_1 = prob[t_idx]        # probability of the events that happened to happen
     prob_0 = 1 .- prob[findall(!in(times), anytimes)] # probability of the events that didn't happen not to happen
@@ -37,7 +37,7 @@ function discrete_negloglik(sepp::SEPPExpKern)
 end
 
 
-function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> 1 + exp(-d)) ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> exp(-d)) ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     any(tst) && (return Inf)
 
@@ -60,7 +60,7 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
 
     vol = volfunc(anytimes, mts, γ, δ, impact_func)     # ν function in Li2020
     intens = μ .+ ϕ .* vol       # rate λ in Li2020
-    prob = 1 .- exp.(-intens )       # probability for an event to happen
+    prob = 1 .- exp.(-intens)       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
     prob_1 = prob[t_idx]        # probability of the events that happened to happen
     prob_0 = 1 .- prob[findall(!in(times), anytimes)] # probability of the events that didn't happen not to happen

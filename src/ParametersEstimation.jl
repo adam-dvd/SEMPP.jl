@@ -3,7 +3,7 @@
 
 Compute the volatility function that is the term in the rate of a SEPP that corresponds to the self-excitement, denoted by ν in Li2020.
 """
-function volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0, impact_func::Function = (d -> 1 + exp(-d)))::AbstractVector{<:Real}
+function volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0, impact_func::Function = (d -> exp(-d)))::AbstractVector{<:Real}
 
     isempty(when) && (return when)
     isempty(ts.times) && return(zero(when))
