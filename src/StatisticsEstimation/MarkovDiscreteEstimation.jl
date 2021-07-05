@@ -55,5 +55,5 @@ See Li2021 4.2.
 """
 function markov_expected_run_length(sepp::SEPP, n::Integer)::Real # seulement pour SEPPExpKern pour l'instant
     p = consecutive(n,sepp)
-    return 1 + sum(cumprod(p))
+    return (1 + sum(cumprod(p)[1:(n-1)]) + prod(p)/(1-p[n])) / (1 - sum((1-p) .* cumprod(hcat([1,1],p[2:n-1]))))
 end
