@@ -99,8 +99,8 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
     sims = MarkedTimeSeries[]
     horiz = isnothing(horiz) ? 5*y*365 : Int(horiz*365)
 
-    mag_min = 0
-    mag_max = 0
+    mag_min = Inf
+    mag_max = -Inf
 
     for i in 1:M
         sim = discrete_simulation(sempp; start_time = 0, end_time = horiz)
@@ -108,6 +108,9 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
         mag_max = max(mag_max, maximum(sim.marks))
         push!(sims, sim)
     end
+
+    println(mag_min)
+    println(mag_max)
 
     function count(mts::MarkedTimeSeries, magnitude::Real)::Real
         times = mts.times
