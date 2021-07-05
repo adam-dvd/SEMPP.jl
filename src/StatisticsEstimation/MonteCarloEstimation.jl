@@ -149,5 +149,5 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
         end
     end
 
-    return mag_min, mag_max, ret_per
+    return mag_min, mag_max, ret_per_min
 end
