@@ -128,7 +128,7 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
 
         c >= r && (res += 1)
 
-        res == 0 && (res = 1 ; warn += 1)
+        res == 0 && (res = 1)
 
         return horiz/res
     end
