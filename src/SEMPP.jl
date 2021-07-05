@@ -23,7 +23,7 @@ export
     TS, TimeSeries, MarkedTimeSeries,
 
     # data types methods
-    end_time, start_time, ground_process,
+    end_time, start_time, ground_process, copy_above,
 
     # model types
     SEPP, SEPPExpKern, SEMPPExpKern,
@@ -46,7 +46,7 @@ export
     markov_expected_run_length,
 
     ## Monte Carlo 
-    monte_carlo_return_period,
+    monte_carlo_return_period, rQy,
 
     ## tail estimation
     discrete_tail_estimation, tail_estimation
