@@ -29,3 +29,14 @@ function MarkedTimeSeries(ts::TS)::MarkedTimeSeries
     
     return ts
 end
+
+
+"""
+    copy_above(mts::MarkedTimeSeries, mag::Real)::MarkedTimeSeries
+
+Create a copy of mts keeping only events above mag.
+"""
+function copy_above(mts::MarkedTimeSeries, mag::Real)::MarkedTimeSeries
+    idx = mts.marks .> mag
+    return MarkedTimeSeries(mts.times[idx], mts.marks[idx])
+end
