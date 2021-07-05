@@ -133,18 +133,19 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
         return horiz/res
     end
 
-    ret_per = 0
-    ret_per_mem = 1
+    ret_per_min = median((x -> count(x, mag_min)).(sims))
+    ret_per_max = median((x -> count(x, mag_max)).(sims))
     
-    while ret_per != ret_per_mem
-        ret_per_mem = ret_per
+    while ret_per_min != ret_per_max
         mag = 0.5 * (mag_max + mag_min)
         ret_per = median((x -> count(x, mag)).(sims))
 
         if ret_per > r
             mag_min = mag
+            ret_per_min = ret_per
         else
             mag_max = mag    
+            ret_per_max = ret_per
         end
     end
 
