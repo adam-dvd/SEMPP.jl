@@ -36,7 +36,7 @@ export
     discrete_negloglik, negloglik, discrete_fit!, fit!,
 
     # plots
-    rate_plot, pp_prob_plot, marks_prob_plot, marks_qq_plot,
+    rate_plot, pp_prob_plot, marks_prob_plot, marks_qq_plot, marks_plot, marked_rate_plot,
 
     # simulations
     simulation, discrete_simulation,
