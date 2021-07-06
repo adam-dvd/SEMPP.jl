@@ -60,7 +60,7 @@ end
 
 Compute the negative log-likelihood of the marked time series with parmaters in kwargs.
 """
-function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
+function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> exp(-d)) ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     any(tst) && (return Inf)
 
@@ -71,7 +71,7 @@ function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions 
 
     marks = mts.marks
 
-    vol = volfunc(times, mts, γ, δ)
+    vol = volfunc(times, mts, γ, δ, impact_func)
     
     term1 = sum(log.(μ .+ ϕ .* vol))
     term2 = μ * T + ϕ/γ * sum((1 .+ δ .* marks) .* (1 .- exp.(-γ .* (endtime .- times))))
@@ -103,8 +103,10 @@ function negloglik(sempp::SEMPPExpKern)::Real
 
     θ = params(sempp)
     markdens = θ[:markdens]
+    impact_func = θ[:impact_function]
     delete!(θ, :markdens)
-    return negloglik(mts, markdens ; θ...)
+    delete!(θ, :impact_function)
+    return negloglik(mts, markdens, impact_func ; θ...)
 end
 
 
