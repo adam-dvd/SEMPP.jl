@@ -7,7 +7,7 @@ function discrete_negloglik(ts::TS;  μ::Real, ϕ::Real, γ::Real)::Real        
     tst = [μ, ϕ, γ] .< 0
     any(tst) && (return Inf)
 
-    times = first(ts.times) isa TimeType ? Dates.value.(DateTime.(ts.times)) ./ (1000*3600*24) : ts.times
+    times = first(ts.times) isa TimeType ? Dates.value.(Date.(ts.times)) : ts.times
     starttime = first(times)
     endtime = last(times)
     anytimes = starttime:oneunit(starttime-endtime):endtime
@@ -49,7 +49,7 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
     end
     =#
 
-    times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
+    times = first(mts.times) isa TimeType ? Dates.value.(Date.(mts.times)) : mts.times
     starttime = first(times)
     endtime = last(times)
     anytimes= starttime:oneunit(starttime-endtime):endtime

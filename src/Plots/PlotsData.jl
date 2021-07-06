@@ -35,7 +35,7 @@ function pp_analysis(sepp::SEPP)
 
     mts = MarkedTimeSeries(ts)
     marks = mts.marks
-    times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
+    times = first(mts.times) isa TimeType ? Dates.value.(Date.(mts.times)) : mts.times
 
     starttime = first(times)
 

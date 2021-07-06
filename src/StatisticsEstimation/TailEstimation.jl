@@ -90,7 +90,7 @@ function tail_estimation(sempp::SEMPPExpKern, q::Real = 0.95; to_time::Union{Dis
             error("times and from_date and to_date must be either all Real or all TimeTypes")
         end
 
-        Dates.value(DateTime(to_time - from_time)) ./ (1000*3600*24)
+        Dates.value(Date(to_time - from_time))
 
     else
 
