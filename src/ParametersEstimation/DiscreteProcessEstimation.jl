@@ -11,8 +11,9 @@ function discrete_negloglik(ts::TS;  μ::Real, ϕ::Real, γ::Real)::Real        
     starttime = first(times)
     endtime = last(times)
     anytimes = starttime:oneunit(starttime-endtime):endtime
+    disc_ts = TimeSeries(times)
 
-    vol = volfunc(anytimes, ts, γ)     # ν function in Li2020
+    vol = volfunc(anytimes, disc_ts, γ)     # ν function in Li2020
     intens = μ .+ ϕ .* vol       # rate λ in Li2020
     prob = 1 .- exp.(-intens)       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 
@@ -41,8 +42,9 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
     starttime = first(times)
     endtime = last(times)
     anytimes= starttime:oneunit(starttime-endtime):endtime
+    disc_mts = MarkedTimeSeries(times, mts.marks)
 
-    vol = volfunc(anytimes, mts, γ, δ, impact_func)     # ν function in Li2020
+    vol = volfunc(anytimes, disc_mts, γ, δ, impact_func)     # ν function in Li2020
     intens = μ .+ ϕ .* vol       # rate λ in Li2020
     prob = 1 .- exp.(-intens)       # probability for an event to happen
     t_idx = findall(in(times), anytimes) 

@@ -12,8 +12,8 @@ function volfunc(when::AbstractVector, ts::TS, γ::Real, δ::Real = 0, impact_fu
 
     (ts isa TimeSeries && δ != 0) && (@warn "no marks but δ non zero")
 
-    first(when) isa TimeType && (when = Dates.value.(Date.(when)))
-    times = first(ts.times) isa TimeType ? Dates.value.(Date.(ts.times)) : ts.times
+    first(when) isa TimeType && (when = Dates.value.(DateTime.(when)) ./ (1000*3600*24))
+    times = first(ts.times) isa TimeType ? Dates.value.(DateTime.(ts.times) ./ (1000*3600*24)) : ts.times
     marks = ts isa MarkedTimeSeries ? ts.marks : fill(0, size(times))
 
     mts = hcat(times, marks)
