@@ -37,18 +37,6 @@ function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistr
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     any(tst) && (return Inf)
 
-    #=
-    if any(tst)
-        μ = abs(μ)
-        ϕ = abs(ϕ)
-        γ = abs(γ)
-        δ = abs(δ)
-        β = abs(β)
-        α = abs(α)
-        κ = abs(κ)
-    end
-    =#
-
     times = first(mts.times) isa TimeType ? Dates.value.(Date.(mts.times)) : mts.times
     starttime = first(times)
     endtime = last(times)
