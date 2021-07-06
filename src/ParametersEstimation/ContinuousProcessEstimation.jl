@@ -118,6 +118,34 @@ Fit a self exciting point process model (whithout marks) to the time series in d
 Note that if the time series has marks, this method ignores them, that is modelling the ground process as independent of the marks.
 Returns the minimal Log-likelihood found.
 """ 
+function fit! end
+
+include("macro_def_fits.jl")
+
+@def_fit_sepp [:s1]
+@def_fit_sepp [:s1, :s2]
+@def_fit_sepp [:s1, :s2, :s3]
+
+
+function fit!(sepp::SEPPExpKern)
+    return fit!(sepp, :μ, :ϕ, :γ)
+end
+
+
+@def_fit_sempp [:s1]
+@def_fit_sempp [:s1, :s2]
+@def_fit_sempp [:s1, :s2, :s3]
+@def_fit_sempp [:s1, :s2, :s3, :s4]
+@def_fit_sempp [:s1, :s2, :s3, :s4, :s5]
+@def_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6]
+@def_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6, :s7]
+@def_fit_sempp [:s1, :s2, :s3, :s4, :s5, :s6, :s7, :s8]
+
+function fit!(sempp::SEMPPExpKern)
+    return fit!(sempp, :μ, :ϕ, :γ, :δ, :ξ, :α, :β)
+end
+
+#=
 function fit!(sepp::SEPPExpKern)::Real
     ts = sepp.data
     isnothing(ts) && error("No data in model, can't fit")
@@ -255,3 +283,4 @@ function fit!(sempp::SEMPPExpKern, bounds::Union{Vector{<:Real}, Nothing} = noth
 
     return objective_value(model)
 end
+=#
