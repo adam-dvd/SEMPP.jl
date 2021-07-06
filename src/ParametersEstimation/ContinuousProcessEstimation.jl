@@ -7,7 +7,7 @@ function negloglik(ts::TS; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand
     tst = [μ, ϕ, γ] .< 0
     any(tst) && (return Inf)
 
-    times = first(ts.times) isa TimeType ? Dates.value.(Date.(ts.times)) : ts.times
+    times = first(ts.times) isa TimeType ? Dates.value.(DateTime.(ts.times)) ./ (1000*3600*24) : ts.times
     starttime = first(times)
     endtime = last(times)
     T = endtime - starttime
@@ -64,7 +64,7 @@ function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions 
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     any(tst) && (return Inf)
 
-    times = first(mts.times) isa TimeType ? Dates.value.(Date.(mts.times)) : mts.times
+    times = first(mts.times) isa TimeType ? Dates.value.(DateTime.(mts.times)) ./ (1000*3600*24) : mts.times
     starttime = first(times)
     endtime = last(times)
     T = endtime - starttime
