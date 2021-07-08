@@ -110,7 +110,7 @@ Simulate event records from the model on a discrete timeline.
 function discrete_simulation end
 
 
-function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::Int=1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
+function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 1, end_time::Int=1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
     μ = sepp.μ
     ϕ = sepp.ϕ
     γ = sepp.γ
@@ -122,7 +122,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::I
         ts = TimeSeries(times)
     else
         times = time_bool ? Dates.value.(Date.(history_time_series.times)) : history_time_series.times
-        start_time = last(times) + 1
+        start_time = last(times) + start_time
         end_time = start_time + end_time - 1
         ts = TimeSeries(times)
     end
@@ -143,7 +143,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::I
 end
 
 
-function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time::Int=1000, history_marked_time_series::Union{MarkedTimeSeries, Nothing} = nothing)::MarkedTimeSeries
+function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time::Int=1000, history_marked_time_series::Union{MarkedTimeSeries, Nothing} = nothing)::MarkedTimeSeries
     μ = sempp.μ
     ϕ = sempp.ϕ
     γ = sempp.γ
@@ -163,7 +163,7 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time:
     else
         times = time_bool ? Dates.value.(Date.(history_marked_time_series.times)) : history_marked_time_series.times
         marks = history_marked_time_series.marks
-        start_time = last(times) + 1
+        start_time = last(times) + start_time
         end_time = start_time + end_time - 1
         mts = MarkedTimeSeries(times, marks)
     end
