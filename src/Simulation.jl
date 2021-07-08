@@ -19,7 +19,7 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
         ts = TimeSeries(times)
     else
         times = history_time_series.times
-        start_time = last(times) 
+        start_time = last(times) + start_time
         end_time = start_time + end_time 
         ts = TimeSeries(times)
     end
@@ -66,7 +66,7 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
     else
         times = history_marked_time_series.times
         marks = history_marked_time_series.marks
-        start_time = last(times) 
+        start_time = last(times) + start_time
         end_time = start_time + end_time 
         mts = MarkedTimeSeries(times, marks)
     end
