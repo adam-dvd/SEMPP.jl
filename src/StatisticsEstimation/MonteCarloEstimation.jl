@@ -104,8 +104,8 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
 
     for i in 1:M
         sim = discrete_simulation(sempp; start_time = 0, end_time = horiz)
-        mag_min = min(mag_min, minimum(sim.marks))
-        mag_max = max(mag_max, maximum(sim.marks))
+        mag_min = minimum(vcat(sim.marks, mag_min))
+        mag_max = maximum(vcat(sim.marks, mag_max))
         push!(sims, sim)
     end
 
@@ -153,4 +153,57 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
     end
 
     return 0.5*(mag_min + mag_max), ret_per_min
+end
+
+
+function discrete_forecast(sepp::SEPPExpKern; start_time::Integer = 1, end_time::Integer = 1000, history::Union{TimeSeries, Nothing} = nothing, M::Integer = 500)
+    sims = TimeSeries[]
+
+    if !isnothing(history)
+        (first(history.times) isa TimeType) && (history = TimeSeries(Dates.value.(Date.(history.times))))
+    end
+
+    for i in 1:M
+        push!(sims, discrete_simulation(sepp, start_time = start_time, end_time = end_time, history_time_series = history))
+    end
+
+    p = zeros(Float64, end_time - start_time + 1)
+
+    for ts in sims
+        for t in ts.times
+            p[t - start_time + 1] += 1
+        end
+    end
+
+    p = p ./ M
+
+    return p
+end
+
+
+function discrete_forecast(sempp::SEMPPExpKern; start_time::Integer = 1, end_time::Integer = 1000, history::Union{MarkedTimeSeries, Nothing} = nothing, magnitudes::AbstractVector{<:Real} = [], M::Integer = 500)
+    sims = MarkedTimeSeries[]
+
+    if !isnothing(history)
+        (first(history.times) isa TimeType) && (history = MarkedTimeSeries(Dates.value.(Date.(history.times)), history.marks))
+    end
+
+    for i in 1:M
+        push!(sims, discrete_simulation(sempp, start_time = start_time, end_time = end_time, history_time_series = history))
+    end
+
+    p = zeros(Float64, end_time - start_time + 1, length(magnitudes) - 1)
+
+    for mts in sims
+        for i in 1:length(mts.times)
+            m_idx = sum(magnitudes .<= mts.marks[i])
+            if (m_idx > 0) && (m_idx < length(magnitudes))
+                p[mts.times[i] - start_time + 1, m_idx] += 1
+            end
+        end
+    end
+
+    p = p ./ M
+
+    return p
 end
