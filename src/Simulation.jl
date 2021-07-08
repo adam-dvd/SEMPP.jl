@@ -6,14 +6,24 @@ Simulate event records from the model.
 function simulation end
 
 
-function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000)::TimeSeries
+function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
     
     μ = sepp.μ
     ϕ = sepp.ϕ
     γ = sepp.γ
 
-    times = Float64[]
-    ts = TimeSeries(times)
+    first(history_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
+
+    if isnothing(history_time_series)
+        times = Float64[]
+        ts = TimeSeries(times)
+    else
+        times = history_time_series.times
+        start_time = last(times) 
+        end_time = start_time + end_time 
+        ts = TimeSeries(times)
+    end
+
     t = start_time
     λ = μ + ϕ * volfunc([t], ts, γ)[1]
 
@@ -35,7 +45,7 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
 end
 
 
-function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=1000)::MarkedTimeSeries
+function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=1000, history_marked_time_series::Union{MarkedTimeSeries, Nothing} = nothing)::MarkedTimeSeries
     
     μ = sempp.μ
     ϕ = sempp.ϕ
@@ -47,9 +57,20 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
     β = sempp.β
     κ = sempp.κ
 
-    times = Float64[]
-    marks = Float64[]
-    mts = MarkedTimeSeries(times, marks)
+    first(history_marked_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
+
+    if isnothing(history_marked_time_series)
+        times = Float64[]
+        marks = Float64[]
+        mts = MarkedTimeSeries(times, marks)
+    else
+        times = history_marked_time_series.times
+        marks = history_marked_time_series.marks
+        start_time = last(times) 
+        end_time = start_time + end_time 
+        mts = MarkedTimeSeries(times, marks)
+    end
+
     t = start_time
     λ = μ + ϕ * volfunc([t], mts, γ, δ)[1]
 
@@ -89,13 +110,22 @@ Simulate event records from the model on a discrete timeline.
 function discrete_simulation end
 
 
-function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::Int=1000)::TimeSeries
+function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::Int=1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
     μ = sepp.μ
     ϕ = sepp.ϕ
     γ = sepp.γ
 
-    times = Float64[]
-    ts = TimeSeries(times)
+    time_bool = first(history_time_series.times) isa TimeType
+
+    if isnothing(history_time_series)
+        times = Float64[]
+        ts = TimeSeries(times)
+    else
+        times = time_bool ? Dates.value.(Date.(history_time_series.times)) : history_time_series.times
+        start_time = last(times) + 1
+        end_time = start_time + end_time - 1
+        ts = TimeSeries(times)
+    end
     
     for t in start_time:end_time
         λ = μ + ϕ * volfunc([t], ts, γ)[1]
@@ -107,11 +137,13 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 0, end_time::I
         end
     end
 
+    time_bool && ts = TimeSeries(Date.(times))
+
     return ts
 end
 
 
-function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time::Int=1000)::MarkedTimeSeries
+function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time::Int=1000, history_marked_time_series::Union{MarkedTimeSeries, Nothing} = nothing)::MarkedTimeSeries
     μ = sempp.μ
     ϕ = sempp.ϕ
     γ = sempp.γ
@@ -122,9 +154,19 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time:
     β = sempp.β
     κ = sempp.κ
 
-    times = Float64[]
-    marks = Float64[]
-    mts = MarkedTimeSeries(times, marks)
+    time_bool = first(history_marked_time_series.times) isa TimeType
+
+    if isnothing(history_marked_time_series)
+        times = Float64[]
+        marks = Float64[]
+        mts = MarkedTimeSeries(times, marks)
+    else
+        times = time_bool ? Dates.value.(Date.(history_marked_time_series.times)) : history_marked_time_series.times
+        marks = history_marked_time_series.marks
+        start_time = last(times) + 1
+        end_time = start_time + end_time - 1
+        mts = MarkedTimeSeries(times, marks)
+    end
     
     for t in start_time:end_time
         vol = volfunc([t], mts, γ, δ)[1]
@@ -147,6 +189,8 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 0, end_time:
             mts = MarkedTimeSeries(times, marks)
         end
     end
+
+    time_bool && mts = MarkedTimeSeries(Date.(times), marks)
 
     return mts
 end
