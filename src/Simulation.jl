@@ -115,12 +115,13 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 1, end_time::I
     ϕ = sepp.ϕ
     γ = sepp.γ
 
-    time_bool = first(history_time_series.times) isa TimeType
+    time_bool = false
 
     if isnothing(history_time_series)
         times = Float64[]
         ts = TimeSeries(times)
     else
+        time_bool = first(history_time_series.times) isa TimeType
         times = time_bool ? Dates.value.(Date.(history_time_series.times)) : history_time_series.times
         start_time = last(times) + start_time
         end_time = start_time + end_time - 1
@@ -154,13 +155,14 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
     β = sempp.β
     κ = sempp.κ
 
-    time_bool = first(history_marked_time_series.times) isa TimeType
+    time_bool = false
 
     if isnothing(history_marked_time_series)
         times = Float64[]
         marks = Float64[]
         mts = MarkedTimeSeries(times, marks)
     else
+        time_bool = first(history_marked_time_series.times) isa TimeType
         times = time_bool ? Dates.value.(Date.(history_marked_time_series.times)) : history_marked_time_series.times
         marks = history_marked_time_series.marks
         start_time = last(times) + start_time
