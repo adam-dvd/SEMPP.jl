@@ -195,10 +195,18 @@ function discrete_forecast(sempp::SEMPPExpKern; start_time::Integer = 1, end_tim
     p = zeros(Float64, end_time - start_time + 1, length(magnitudes) - 1)
 
     for mts in sims
-        for i in 1:length(mts.times)
-            m_idx = sum(magnitudes .<= mts.marks[i])
-            if (m_idx > 0) && (m_idx < length(magnitudes))
-                p[mts.times[i] - start_time + 1, m_idx] += 1
+        extended_marks = fill(-Inf, end_time - start_time + 1)
+        extended_marks[mts.times .- start_time .+ 1] = mts.marks
+        
+        for i in 1:(end_time - start_time + 1)
+            m_idx = sum(magnitudes .<= extended_marks[i])
+
+            if (m_idx > 0) 
+                if (m_idx < length(magnitudes))
+                    p[i, m_idx] += 1
+                end
+            else
+                p[i, 1] += 1
             end
         end
     end
