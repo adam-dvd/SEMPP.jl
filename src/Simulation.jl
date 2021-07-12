@@ -19,18 +19,20 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
     if isnothing(history_time_series)
         times = Float64[]
         ts = TimeSeries(times)
+        real_start = start_time
+        real_end = end_time
     else
-        times = history_time_series.times
+        times = copy(history_time_series.times)
         last_h = last(times)
-        start_time = last_h + start_time
-        end_time = last_h + end_time 
+        real_start = last_h + start_time
+        real_end = last_h + end_time 
         ts = TimeSeries(times)
     end
 
-    t = start_time
+    t = real_start
     λ = μ + ϕ * volfunc([t], ts, γ)[1]
 
-    while t <= end_time
+    while t <= real_end
         M = λ
         s = rand(Distributions.Exponential(1/λ))
         t = t + s
@@ -71,18 +73,18 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
         marks = Float64[]
         mts = MarkedTimeSeries(times, marks)
     else
-        times = history_marked_time_series.times
-        marks = history_marked_time_series.marks
+        times = copy(history_marked_time_series.times)
+        marks = copy(history_marked_time_series.marks)
         last_h = last(times)
-        start_time = last_h + start_time
-        end_time = last_h + end_time 
+        real_start = last_h + start_time
+        real_end = last_h + end_time 
         mts = MarkedTimeSeries(times, marks)
     end
 
-    t = start_time
+    t = real_start
     λ = μ + ϕ * volfunc([t], mts, γ, δ)[1]
 
-    while t <= end_time
+    while t <= real_end
         M = λ
         s = rand(Distributions.Exponential(1/λ))
         t = t + s
@@ -132,16 +134,18 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Integer = 1, end_tim
     if isnothing(history_time_series)
         times = Integer[]
         ts = TimeSeries(times)
+        real_start = start_time
+        real_end = end_time
     else
         time_bool = first(history_time_series.times) isa TimeType
-        times = time_bool ? Dates.value.(Date.(history_time_series.times)) : history_time_series.times
+        times = time_bool ? Dates.value.(Date.(history_time_series.times)) : copy(history_time_series.times)
         last_h = last(times)
-        start_time = last_h + start_time
-        end_time = last_h + end_time
+        real_start = last_h + start_time
+        real_end = last_h + end_time
         ts = TimeSeries(times)
     end
     
-    for t in start_time:end_time
+    for t in real_start:real_end
         λ = μ + ϕ * volfunc([t], ts, γ)[1]
         prob = 1 - exp(-λ)
 
@@ -179,15 +183,15 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
         mts = MarkedTimeSeries(times, marks)
     else
         time_bool = first(history_marked_time_series.times) isa TimeType
-        times = time_bool ? Dates.value.(Date.(history_marked_time_series.times)) : history_marked_time_series.times
-        marks = history_marked_time_series.marks
+        times = time_bool ? Dates.value.(Date.(history_marked_time_series.times)) : copy(history_marked_time_series.times)
+        marks = copy(history_marked_time_series.marks)
         last_h = last(times)
-        start_time = last_h + start_time
-        end_time = last_h + end_time
+        real_start = last_h + start_time
+        real_end = last_h + end_time
         mts = MarkedTimeSeries(times, marks)
     end
     
-    for t in start_time:end_time
+    for t in real_start:real_end
         vol = volfunc([t], mts, γ, δ)[1]
         λ = μ + ϕ * vol
         prob = 1 - exp(-λ)
