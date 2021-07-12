@@ -8,18 +8,21 @@ function simulation end
 
 function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
     
+    first(history_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
+
     μ = sepp.μ
     ϕ = sepp.ϕ
     γ = sepp.γ
-
-    first(history_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
+    
+    last_h = -Inf   # keeps track of the last time stamp that is not simulated
 
     if isnothing(history_time_series)
         times = Float64[]
         ts = TimeSeries(times)
     else
         times = history_time_series.times
-        start_time = last(times) + start_time
+        last_h = last(times)
+        start_time = last_h + start_time
         end_time = start_time + end_time 
         ts = TimeSeries(times)
     end
@@ -41,12 +44,16 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
 
     end
 
+    ts = TimeSeries(times[times .> last_h])
+
     return ts
 end
 
 
 function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=1000, history_marked_time_series::Union{MarkedTimeSeries, Nothing} = nothing)::MarkedTimeSeries
     
+    first(history_marked_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
+
     μ = sempp.μ
     ϕ = sempp.ϕ
     γ = sempp.γ
@@ -57,7 +64,7 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
     β = sempp.β
     κ = sempp.κ
 
-    first(history_marked_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
+    last_h = -Inf   # keeps track of the last time stamp that is not simulated
 
     if isnothing(history_marked_time_series)
         times = Float64[]
@@ -66,7 +73,8 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
     else
         times = history_marked_time_series.times
         marks = history_marked_time_series.marks
-        start_time = last(times) + start_time
+        last_h = last(times)
+        start_time = last_h + start_time
         end_time = start_time + end_time 
         mts = MarkedTimeSeries(times, marks)
     end
@@ -98,32 +106,37 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
 
     end
 
+    idx = times .> last_h
+    mts = MarkedTimeSeries(times[idx], marks[idx])
+
     return mts
 end
 
 
 """
-    simulation::TS
+    discrete_simulation::TS
 
 Simulate event records from the model on a discrete timeline.
 """
 function discrete_simulation end
 
 
-function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 1, end_time::Int=1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
+function discrete_simulation(sepp::SEPPExpKern; start_time::Integer = 1, end_time::Integer = 1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
     μ = sepp.μ
     ϕ = sepp.ϕ
     γ = sepp.γ
 
     time_bool = false
+    last_h = -Inf   # keeps track of the last time stamp that is not simulated
 
     if isnothing(history_time_series)
-        times = Float64[]
+        times = Integer[]
         ts = TimeSeries(times)
     else
         time_bool = first(history_time_series.times) isa TimeType
         times = time_bool ? Dates.value.(Date.(history_time_series.times)) : history_time_series.times
-        start_time = last(times) + start_time
+        last_h = last(times)
+        start_time = last_h + start_time
         end_time = start_time + end_time - 1
         ts = TimeSeries(times)
     end
@@ -137,6 +150,8 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 1, end_time::I
             ts = TimeSeries(times)
         end
     end
+
+    ts = TimeSeries(times[times .> last_h])
 
     time_bool && (ts = TimeSeries(Date.(times)))
 
@@ -156,6 +171,7 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
     κ = sempp.κ
 
     time_bool = false
+    last_h = -Inf   # keeps track of the last time stamp that is not simulated
 
     if isnothing(history_marked_time_series)
         times = Float64[]
@@ -165,7 +181,8 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
         time_bool = first(history_marked_time_series.times) isa TimeType
         times = time_bool ? Dates.value.(Date.(history_marked_time_series.times)) : history_marked_time_series.times
         marks = history_marked_time_series.marks
-        start_time = last(times) + start_time
+        last_h = last(times)
+        start_time = last_h + start_time
         end_time = start_time + end_time - 1
         mts = MarkedTimeSeries(times, marks)
     end
@@ -191,6 +208,9 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
             mts = MarkedTimeSeries(times, marks)
         end
     end
+
+    idx = times .> last_h
+    mts = MarkedTimeSeries(times[idx], marks[idx])
 
     time_bool && (mts = MarkedTimeSeries(Date.(times), marks))
 
