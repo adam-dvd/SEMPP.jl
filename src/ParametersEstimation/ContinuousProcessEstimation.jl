@@ -74,7 +74,7 @@ function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions,
     vol = volfunc(times, mts, γ, δ, impact_func)
     
     term1 = sum(log.(μ .+ ϕ .* vol))
-    term2 = μ * T + ϕ/γ * sum((1 .+ δ .* marks) .* (1 .- exp.(-γ .* (endtime .- times))))
+    term2 = μ * T + ϕ/γ * sum((impact_func(δ .* marks)) .* (1 .- exp.(-γ .* (endtime .- times))))
 
     σ = β .+ α .* vol
     sig_marks = hcat(σ, marks)
