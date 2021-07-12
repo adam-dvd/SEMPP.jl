@@ -23,7 +23,7 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
         times = history_time_series.times
         last_h = last(times)
         start_time = last_h + start_time
-        end_time = start_time + end_time 
+        end_time = last_h + end_time 
         ts = TimeSeries(times)
     end
 
@@ -75,7 +75,7 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
         marks = history_marked_time_series.marks
         last_h = last(times)
         start_time = last_h + start_time
-        end_time = start_time + end_time 
+        end_time = last_h + end_time 
         mts = MarkedTimeSeries(times, marks)
     end
 
@@ -137,7 +137,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Integer = 1, end_tim
         times = time_bool ? Dates.value.(Date.(history_time_series.times)) : history_time_series.times
         last_h = last(times)
         start_time = last_h + start_time
-        end_time = start_time + end_time - 1
+        end_time = last_h + end_time
         ts = TimeSeries(times)
     end
     
@@ -183,7 +183,7 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
         marks = history_marked_time_series.marks
         last_h = last(times)
         start_time = last_h + start_time
-        end_time = start_time + end_time - 1
+        end_time = last_h + end_time
         mts = MarkedTimeSeries(times, marks)
     end
     
