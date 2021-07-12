@@ -138,7 +138,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Int = 1, end_time::I
         end
     end
 
-    time_bool && ts = TimeSeries(Date.(times))
+    time_bool && (ts = TimeSeries(Date.(times)))
 
     return ts
 end
@@ -192,7 +192,7 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
         end
     end
 
-    time_bool && mts = MarkedTimeSeries(Date.(times), marks)
+    time_bool && (mts = MarkedTimeSeries(Date.(times), marks))
 
     return mts
 end
