@@ -46,7 +46,7 @@ export
     markov_expected_run_length,
 
     ## Monte Carlo 
-    monte_carlo_return_period, rQy,
+    monte_carlo_return_period, rQy, discrete_forecast,
 
     ## tail estimation
     discrete_tail_estimation, tail_estimation
