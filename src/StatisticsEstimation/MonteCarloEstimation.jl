@@ -163,15 +163,19 @@ function discrete_forecast(sepp::SEPPExpKern; start_time::Integer = 1, end_time:
         (first(history.times) isa TimeType) && (history = TimeSeries(Dates.value.(Date.(history.times))))
     end
 
+    last_h = last(history.times)
+
     for i in 1:M
         push!(sims, discrete_simulation(sepp, start_time = start_time, end_time = end_time, history_time_series = history))
     end
 
     p = zeros(Float64, end_time - start_time + 1)
 
+    real_start = last_h + start_time
+
     for ts in sims
         for t in ts.times
-            p[t - start_time + 1] += 1
+            p[t - real_start + 1] += 1
         end
     end
 
