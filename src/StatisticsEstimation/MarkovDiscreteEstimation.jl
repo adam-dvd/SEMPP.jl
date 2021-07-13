@@ -47,13 +47,13 @@ end
 
 
 """
-    markov_expected_run_length(sepp::SEPP, n::Integer)::Real
+    markov_return_period(sepp::SEPP, r::Integer)::Real
 
-Compute the expected run length for the model based on a markov chain.
+Compute the expected return period of a run of r consecutive events for the model based on a markov chain.
 
 See Li2021 4.2.
 """
-function markov_expected_run_length(sepp::SEPP, n::Integer)::Real # seulement pour SEPPExpKern pour l'instant
-    p = consecutive(n,sepp)
-    return (1 + sum(cumprod(p)[1:(n-1)]) + prod(p) / (1 - p[n])) / (1 - sum((1 .- p) .* cumprod(hcat([1,1], p[2:n-1]))))
+function markov_return_period(sepp::SEPP, r::Integer)::Real # seulement pour SEPPExpKern pour l'instant
+    p = consecutive(r+1,sepp)
+    return (1 + sum(cumprod(p)[1:(r-1)]) + prod(p[1:r]) / (1 - p[r+1])) / (1 - sum((1 .- p[1:r]) .* cumprod(vcat([1], p[1:r-1]))))
 end
