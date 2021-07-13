@@ -20,22 +20,22 @@ function monte_carlo_return_period(sepp::SEPP; r::Integer = 7, horiz::Integer = 
     sims = TS[]
 
     for i in 1:M
-        push!(sims, discrete_simulation(sepp; start_time = 0, end_time = horiz))
+        push!(sims, discrete_simulation(sepp; start_time = 1, end_time = horiz))
     end
 
     warn = 0
 
     function count(ts::TS)::Real
-        times = ts.times
+        times = copy(ts.times)
         res = 0
         c = 1
 
         for i in 2:length(times)
             if c == 0 || times[i-1] == times[i] - 1
-                c+=1
+                c += 1
             else
                 c >= r && (res += 1)
-                c=0
+                c = 0
             end      
         end
 
@@ -54,18 +54,18 @@ function monte_carlo_return_period(sepp::SEPP; r::Integer = 7, horiz::Integer = 
 end
 
 
-function monte_carlo_return_period(sepp::SEMPPExpKern; magnitude::Real, r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
+function monte_carlo_return_period(sempp::SEMPPExpKern; magnitude::Real, r::Integer = 7, horiz::Integer = 100, M::Integer = 500)::Real
     sims = MarkedTimeSeries[]
 
     for i in 1:M
-        push!(sims, discrete_simulation(sepp; start_time = 0, end_time = horiz))
+        push!(sims, discrete_simulation(sempp; start_time = 1, end_time = horiz))
     end
 
     warn = 0
 
     function count(mts::MarkedTimeSeries)::Real
-        times = mts.times
-        marks = mts.marks
+        times = copy(mts.times)
+        marks = copy(mts.marks)
         
         res = 0
         c = 0
@@ -113,8 +113,8 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
     println(mag_max)
 
     function count(mts::MarkedTimeSeries, magnitude::Real)::Real
-        times = mts.times
-        marks = mts.marks
+        times = copy(mts.times)
+        marks = copy(mts.marks)
         
         res = 0
         c = 0
