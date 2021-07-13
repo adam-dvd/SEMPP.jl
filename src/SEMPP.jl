@@ -43,7 +43,7 @@ export
 
     # statistics estimation
     ## Markov
-    markov_expected_run_length,
+    markov_return_period,
 
     ## Monte Carlo 
     monte_carlo_return_period, rQy, discrete_forecast,
