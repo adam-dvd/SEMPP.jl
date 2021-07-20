@@ -2,8 +2,7 @@ module SEMPP
 
 using Distributions
 using EGPD
-using JuMP
-using Ipopt
+using Optim
 using DataFrames, Gadfly
 using Dates
 using Extremes
