@@ -60,7 +60,7 @@ end
 
 Compute the negative log-likelihood of the marked time series with parmaters in kwargs.
 """
-function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> exp(-d)) ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
+function negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> 1 + tanh(d)) ; μ::Real = rand(), ϕ::Real = rand(), γ::Real = rand(), δ::Real = 0, ξ::Real = rand(), α::Real = rand(), β::Real = rand(), κ::Real = 1)::Real
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     any(tst) && (return Inf)
 

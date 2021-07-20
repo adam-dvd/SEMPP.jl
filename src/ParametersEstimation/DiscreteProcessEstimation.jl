@@ -34,7 +34,7 @@ function discrete_negloglik(sepp::SEPPExpKern)
 end
 
 
-function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> exp(-d)) ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
+function discrete_negloglik(mts::MarkedTimeSeries, markdens::SupportedMarksDistributions, impact_func::Function = (d -> 1 + tanh(d)) ;  μ::Real, ϕ::Real, γ::Real, δ::Real = 0, ξ::Real, α::Real, β::Real, κ::Real = 1)
     tst = [μ, ϕ, γ, δ, β, α, κ] .< 0
     any(tst) && (return Inf)
 
