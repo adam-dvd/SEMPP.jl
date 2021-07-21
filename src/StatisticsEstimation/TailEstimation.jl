@@ -8,8 +8,8 @@ See Li2020 for the mathematics behind this method.
 from_time defaults to the last timestamp in the time series, and to_time defaults to from_time + 1. 
 Note that if from_time differs from the last timestamp in the time series, it will be considered that no event happened between this last timestamp and from_time.
 """
-function discrete_tail_estimation(sempp::SEMPPExpKern, q::Real = 0.95; to_time::Union{DiscreteTimeTypes, Nothing} = nothing, from_time::Union{DiscreteTimeTypes, Nothing} = nothing)::Real 
-    mts = sempp.data
+function discrete_tail_estimation(sempp::SEMPPExpKern, q::Real = 0.95; to_time::Union{DiscreteTimeTypes, Nothing} = nothing, from_time::Union{DiscreteTimeTypes, Nothing} = nothing, history::Union{MarkedTimeSeries, Nothing} = nothing)::Real 
+    mts = isnothing(history) ? MarkedTimeSeries([], []) : history
     isnothing(mts) && error("No data in model, can't estimate")
 
     isnothing(from_time) && (from_time = end_time(mts))
