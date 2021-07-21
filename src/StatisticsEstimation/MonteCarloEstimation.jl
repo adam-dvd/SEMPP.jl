@@ -109,9 +109,6 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
         push!(sims, sim)
     end
 
-    println(mag_min)
-    println(mag_max)
-
     function count(mts::MarkedTimeSeries, magnitude::Real)::Real
         times = copy(mts.times)
         marks = copy(mts.marks)
@@ -138,6 +135,9 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
 
     ret_per_min = median((x -> count(x, mag_min)).(sims))
     ret_per_max = median((x -> count(x, mag_max)).(sims))
+
+    println(ret_per_min)
+    println(ret_per_max)
     
     while abs(ret_per_max - ret_per_min) >= 1
         mag = 0.5 * (mag_max + mag_min)
