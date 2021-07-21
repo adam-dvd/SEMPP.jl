@@ -209,9 +209,7 @@ function discrete_forecast(sempp::SEMPPExpKern; start_time::Integer = 1, end_tim
             m_idx = sum(magnitudes .<= extended_marks[i])
 
             if (m_idx > 0) 
-                if (m_idx < length(magnitudes))
-                    p[i, m_idx] += 1
-                end
+                p[i, m_idx] += 1
             else
                 p[i, 1] += 1
             end
