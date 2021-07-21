@@ -154,7 +154,7 @@ macro def_discrete_fit_sempp(params_to_fit)
     kw_expr = :(kw = Dict($(kw_expr_it...)))
 
     to_min_expr = Expr(:function, Expr(:call, :to_min, :x), quote
-        default_kw = Dict{Symbol, Real}(:μ => θ[:μ], :ϕ => θ[:ϕ], :γ => θ[:γ])
+        default_kw = Dict{Symbol, Real}(:μ => θ[:μ], :ϕ => θ[:ϕ], :γ => θ[:γ], :δ => θ[:δ], :ξ => θ[:ξ], :β => θ[:β], :α => θ[:α], :κ => θ[:κ])
         $kw_expr
         final_kw = merge(default_kw, kw)
         return discrete_negloglik(mts, markdens, impact_func; final_kw...)
