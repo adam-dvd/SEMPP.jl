@@ -72,7 +72,7 @@ function monte_carlo_return_period(sempp::SEMPPExpKern; magnitude::Real, r::Inte
         marks[1] >= magnitude && (c = 1)
 
         for i in 2:length(times)
-            if (marks[1] >= magnitude) && (c == 0 || times[i-1] == times[i] - 1)
+            if (marks[i] >= magnitude) && (c == 0 || times[i-1] == times[i] - 1)
                 c+=1
             else
                 c >= r && (res += 1)
@@ -115,17 +115,20 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
         
         res = 0
         c = 0
-        marks[1] >= magnitude && (c = 1)
 
-        for i in 2:length(times)
-            if (marks[1] >= magnitude) && (c == 0 || times[i-1] == times[i] - 1)
-                c+=1
-            else
-                c >= r && (res += 1)
-                c=0
-            end      
+        if !isempty(times)
+            marks[1] >= magnitude && (c = 1)
+
+            for i in 2:length(times)
+                if (marks[i] >= magnitude) && (c == 0 || times[i-1] == times[i] - 1)
+                    c+=1
+                else
+                    c >= r && (res += 1)
+                    c=0
+                end      
+            end
         end
-
+        
         c >= r && (res += 1)
 
         res == 0 && (res = 1)
