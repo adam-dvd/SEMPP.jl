@@ -67,6 +67,8 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
         times = Float64[]
         marks = Float64[]
         mts = MarkedTimeSeries(times, marks)
+        real_start = start_time
+        real_end = end_time
     else
         first(history_marked_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
         times = copy(history_marked_time_series.times)
@@ -177,6 +179,8 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
         times = Float64[]
         marks = Float64[]
         mts = MarkedTimeSeries(times, marks)
+        real_start = start_time
+        real_end = end_time
     else
         time_bool = first(history_marked_time_series.times) isa TimeType
         times = time_bool ? Dates.value.(Date.(history_marked_time_series.times)) : copy(history_marked_time_series.times)
