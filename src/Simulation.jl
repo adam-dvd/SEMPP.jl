@@ -7,9 +7,6 @@ function simulation end
 
 
 function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000, history_time_series::Union{TimeSeries, Nothing} = nothing)::TimeSeries
-    
-    first(history_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
-
     μ = sepp.μ
     ϕ = sepp.ϕ
     γ = sepp.γ
@@ -22,6 +19,7 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
         real_start = start_time
         real_end = end_time
     else
+        first(history_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
         times = copy(history_time_series.times)
         last_h = last(times)
         real_start = last_h + start_time
@@ -53,9 +51,6 @@ end
 
 
 function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=1000, history_marked_time_series::Union{MarkedTimeSeries, Nothing} = nothing)::MarkedTimeSeries
-    
-    first(history_marked_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
-
     μ = sempp.μ
     ϕ = sempp.ϕ
     γ = sempp.γ
@@ -73,6 +68,7 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
         marks = Float64[]
         mts = MarkedTimeSeries(times, marks)
     else
+        first(history_marked_time_series.times) isa TimeType && (error("TimeType are discrete, try discrete_simulation or use a continuous time series."))
         times = copy(history_marked_time_series.times)
         marks = copy(history_marked_time_series.marks)
         last_h = last(times)
