@@ -196,7 +196,7 @@ function discrete_forecast(sempp::SEMPPExpKern; start_time::Integer = 1, end_tim
     end
 
     for i in 1:M
-        push!(sims, discrete_simulation(sempp, start_time = start_time, end_time = end_time, history_time_series = history))
+        push!(sims, discrete_simulation(sempp, start_time = start_time, end_time = end_time, history_marked_time_series = history))
     end
 
     p = zeros(Float64, end_time - start_time + 1, length(magnitudes) - 1)
