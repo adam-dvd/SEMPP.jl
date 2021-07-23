@@ -103,7 +103,7 @@ function rQy(sempp::SEMPPExpKern, r::Integer = 7, y::Real = 2; horiz::Union{Real
     mag_max = -Inf
 
     for i in 1:M
-        sim = discrete_simulation(sempp; start_time = 0, end_time = horiz)
+        sim = discrete_simulation(sempp; start_time = 1, end_time = horiz)
         mag_min = minimum(vcat(sim.marks, mag_min))
         mag_max = maximum(vcat(sim.marks, mag_max))
         push!(sims, sim)
