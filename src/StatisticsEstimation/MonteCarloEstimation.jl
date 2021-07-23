@@ -194,15 +194,19 @@ function discrete_forecast(sempp::SEMPPExpKern; start_time::Integer = 1, end_tim
         (first(history.times) isa TimeType) && (history = MarkedTimeSeries(Dates.value.(Date.(history.times)), history.marks))
     end
 
+    last_h = last(history.times)
+
     for i in 1:M
         push!(sims, discrete_simulation(sempp, start_time = start_time, end_time = end_time, history_marked_time_series = history))
     end
 
     p = zeros(Float64, end_time - start_time + 1, length(magnitudes) - 1)
 
+    real_start = last_h + start_time
+
     for mts in sims
         extended_marks = fill(-Inf, end_time - start_time + 1)
-        extended_marks[mts.times .- start_time .+ 1] = mts.marks
+        extended_marks[mts.times .- real_start .+ 1] = mts.marks
         
         for i in 1:(end_time - start_time + 1)
             m_idx = sum(magnitudes .<= extended_marks[i])
