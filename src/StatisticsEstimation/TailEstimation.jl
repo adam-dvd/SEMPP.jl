@@ -120,7 +120,7 @@ function tail_estimation(sempp::SEMPPExpKern, q::Real = 0.95; to_time::Union{Dis
     β = sempp.β
     κ = sempp.κ
 
-    σ = β + α * vol
+    σ = β + α * vol[1]
 
     if markdens == Distributions.GeneralizedPareto
         exceed_q = σ / ξ * ((prob / (1 - q))^ξ - 1)
