@@ -200,7 +200,7 @@ function discrete_forecast(sempp::SEMPPExpKern; start_time::Integer = 1, end_tim
         push!(sims, discrete_simulation(sempp, start_time = start_time, end_time = end_time, history_marked_time_series = history))
     end
 
-    p = zeros(Float64, end_time - start_time + 1, length(magnitudes) - 1)
+    p = zeros(Float64, end_time - start_time + 1, length(magnitudes) + 1 )
 
     real_start = last_h + start_time
 
@@ -210,12 +210,7 @@ function discrete_forecast(sempp::SEMPPExpKern; start_time::Integer = 1, end_tim
         
         for i in 1:(end_time - start_time + 1)
             m_idx = sum(magnitudes .<= extended_marks[i])
-
-            if (m_idx > 0) 
-                p[i, m_idx] += 1
-            else
-                p[i, 1] += 1
-            end
+            p[i, m_idx + 1] += 1
         end
     end
 
