@@ -11,11 +11,11 @@ Note that if from_time differs from the last timestamp in the time series, it wi
 function discrete_tail_estimation(sempp::SEMPPExpKern, q::Real = 0.95; to_time::Union{DiscreteTimeTypes, Nothing} = nothing, from_time::Union{DiscreteTimeTypes, Nothing} = nothing, history::Union{MarkedTimeSeries, Nothing} = nothing)::Real 
     mts = isnothing(history) ? MarkedTimeSeries([], []) : history
 
-    isnothing(from_time) && (from_time = end_time(mts))
-
     if start_time(mts) isa TimeType
 
-        isnothing(to_time) && (to_time = from_time + Day(1))
+        isnothing(from_time) && (from_time = end_time(mts) + Day(1))
+
+        isnothing(to_time) && (to_time = from_time)
 
         if !(from_time isa TimeType) || !(to_time isa TimeType) 
             error("times and from_date and to_date must be either all Integers or all TimeTypes")
@@ -24,7 +24,9 @@ function discrete_tail_estimation(sempp::SEMPPExpKern, q::Real = 0.95; to_time::
         when = from_time:Dates.Day(1):to_time
     else
 
-        isnothing(to_time) && (to_time = from_time + 1)
+        isnothing(from_time) && (from_time = end_time(mts) + 1)
+
+        isnothing(to_time) && (to_time = from_time)
 
         if !(from_time isa Integer) || !(to_time isa Integer) 
             error("times and from_date and to_date must be either all Integers or all TimeTypes")
@@ -50,7 +52,7 @@ function discrete_tail_estimation(sempp::SEMPPExpKern, q::Real = 0.95; to_time::
     β = sempp.β
     κ = sempp.κ
 
-    σ = β + α * vol
+    σ = β + α * vol[1]
 
     if markdens == Distributions.GeneralizedPareto
         exceed_q = σ / ξ * ((prob / (1 - q))^ξ - 1)
