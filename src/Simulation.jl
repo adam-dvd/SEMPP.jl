@@ -38,8 +38,7 @@ function simulation(sepp::SEPPExpKern; start_time::Real = 0, end_time::Real=1000
         p = rand()
 
         if p <= λ/M 
-            push!(times, t)
-            ts = TimeSeries(times)
+            push!(times, t)     # updates ts as well since we push in place
         end
 
     end
@@ -91,7 +90,7 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
         p = rand()
 
         if p <= λ/M 
-            push!(times, t)
+            push!(times, t)     # updates ts as well since we push in place
             σ = β + α * vol[1]
 
             if markdens == Distributions.GeneralizedPareto
@@ -100,8 +99,7 @@ function simulation(sempp::SEMPPExpKern; start_time::Real = 0, end_time::Real=10
                 m = rand(EGPD.EGPpower(σ, ξ, κ))
             end
 
-            push!(marks, m)
-            mts = MarkedTimeSeries(times, marks)
+            push!(marks, m)     # updates ts as well since we push in place
         end
 
     end
@@ -148,8 +146,7 @@ function discrete_simulation(sepp::SEPPExpKern; start_time::Integer = 1, end_tim
         prob = 1 - exp(-λ)
 
         if rand() <= prob
-            push!(times, t)
-            ts = TimeSeries(times)
+            push!(times, t)     # updates ts as well since we push in place
         end
     end
 
@@ -207,9 +204,7 @@ function discrete_simulation(sempp::SEMPPExpKern; start_time::Int = 1, end_time:
                 m = rand(EGPD.EGPpower(σ, ξ, κ))
             end
 
-            push!(marks, m)
-            
-            mts = MarkedTimeSeries(times, marks)
+            push!(marks, m)     # updates ts as well since we push in place
         end
     end
 
